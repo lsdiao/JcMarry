@@ -131,15 +131,23 @@
     border:1px solid var(--line);color:var(--ink-soft);cursor:pointer;white-space:nowrap;}
   .chip.on{background:var(--ink);color:#fff;border-color:var(--ink);}
 
-  .match{background:var(--card);border-radius:22px;margin:0 22px 16px;padding:16px;box-shadow:var(--shadow-sm);
-    border:1px solid var(--line);cursor:pointer;transition:.2s;position:relative;overflow:hidden;}
+  .match{background:var(--card);border-radius:22px;margin:0 22px 16px;overflow:hidden;
+    box-shadow:var(--shadow-sm);border:1px solid var(--line);cursor:pointer;transition:.2s;}
   .match:active{transform:scale(.99);}
-  .match .m-row{display:flex;gap:14px;}
-  .match .m-name{font-family:var(--serif);font-size:18px;font-weight:600;}
-  .match .m-meta{font-size:12px;color:var(--ink-soft);margin-top:3px;}
-  .match .m-desc{font-size:13px;color:var(--ink-soft);margin-top:8px;line-height:1.6;
+  .match .m-photo{position:relative;aspect-ratio:4/5;background-size:cover;background-position:center top;}
+  .match .m-photo-top{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;}
+  .m-verify{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.88);color:var(--celadon-deep);font-size:11px;font-weight:600;padding:5px 10px;border-radius:20px;}
+  .m-verify svg{width:12px;height:12px;stroke:var(--celadon-deep);fill:none;stroke-width:2;}
+  .m-dist{display:inline-flex;align-items:center;gap:4px;background:rgba(30,22,14,.42);color:#fff;font-size:11px;font-weight:500;padding:5px 10px;border-radius:20px;}
+  .m-dist svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2;}
+  .match .m-photo-bot{position:absolute;left:0;right:0;bottom:0;padding:40px 16px 14px;background:linear-gradient(transparent,rgba(30,22,14,.74));color:#fff;}
+  .match .m-name{font-family:var(--serif);font-size:19px;font-weight:600;}
+  .match .m-meta{font-size:12px;color:rgba(255,255,255,.92);margin-top:4px;}
+  .match .m-body{padding:13px 16px 15px;}
+  .match .m-tags{display:flex;flex-wrap:wrap;gap:7px;}
+  .match .m-desc{font-size:13px;color:var(--ink-soft);margin:10px 0 13px;line-height:1.6;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-  .match .m-actions{display:flex;gap:10px;margin-top:12px;}
+  .match .m-actions{display:flex;gap:10px;}
   .mini-btn{flex:1;padding:9px;border-radius:16px;font-size:13px;font-weight:600;text-align:center;cursor:pointer;
     border:1px solid var(--line);background:var(--card-2);color:var(--ink-soft);display:inline-flex;align-items:center;justify-content:center;gap:5px;}
   .mini-btn.like{background:var(--cinnabar);color:#fff;border-color:var(--cinnabar);}
@@ -328,13 +336,13 @@
             <div class="feat-row">
               <div class="port" id="portA"></div>
               <div class="feat-info">
-                <div class="feat-name">清和 · 29岁</div>
-                <div class="feat-meta">国画老师 · 距你 1.2km · 茶社常客</div>
-                <div style="margin-top:8px;"><span class="tag">国学</span><span class="tag warm">家庭教育</span><span class="tag">茶道</span></div>
+                <div class="feat-name">静姝 · 28岁</div>
+                <div class="feat-meta">插画师 · 距你 1.2km · 茶社常客</div>
+                <div style="margin-top:8px;"><span class="tag">插画</span><span class="tag warm">茶道</span><span class="tag">阅读</span></div>
               </div>
             </div>
             <div class="feat-desc">「愿得一人，闲时煮茶，忙时各自发光。」在素心茶房等你一同读一本旧书。</div>
-            <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="openMatch('清和')">查看这份缘分</button>
+            <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="openMatch('静姝')">查看这份缘分</button>
           </div>
         </div>
         <div class="sec">
@@ -379,29 +387,50 @@
         <div class="filterbar" style="margin-bottom:12px;">
           <div class="chip on">全部</div><div class="chip">28-32岁</div><div class="chip">3km内</div><div class="chip">本科+</div><div class="chip">爱茶道</div><div class="chip">更多</div>
         </div>
-        <div class="match" onclick="openMatch('清和')">
-          <div class="m-row"><div class="port" id="portB"></div>
-            <div style="flex:1;"><div class="m-name">清和 · 29岁</div><div class="m-meta">国画老师 · 未婚 · 距你 1.2km</div></div></div>
-          <div style="margin-top:8px;"><span class="tag">国学</span><span class="tag warm">家庭教育</span><span class="tag">茶道</span><span class="tag">阅读</span></div>
-          <div class="m-desc">性格温和，周末爱去茶社临帖。希望找一个能一起安静生活、也愿意聊聊人生的人。</div>
-          <div class="m-actions"><div class="mini-btn" onclick="event.stopPropagation();toast('已暂略')"><svg class="ico sm" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>暂略</div>
-            <div class="mini-btn like" onclick="event.stopPropagation();like('清和')"><svg class="ico sm" style="stroke:#fff;" viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9C1 8 3 4.5 6.5 4.5 9 4.5 12 7 12 7s3-2.5 5.5-2.5C21 4.5 23 8 21.3 12 19 16.4 12 21 12 21z"/></svg>心动</div></div>
+        <div class="match" onclick="openMatch('静姝')">
+          <div class="m-photo" style="background-image:url('suxin_girl1.png')">
+            <div class="m-photo-top">
+              <span class="m-verify"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>实名认证</span>
+              <span class="m-dist"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>1.2km</span>
+            </div>
+            <div class="m-photo-bot"><div class="m-name">静姝 · 28岁</div><div class="m-meta">插画师 · 未婚 · 距你 1.2km</div></div>
+          </div>
+          <div class="m-body">
+            <div class="m-tags"><span class="tag">插画</span><span class="tag warm">茶道</span><span class="tag">阅读</span><span class="tag">手作</span></div>
+            <div class="m-desc">性格温和，周末爱去茶社临帖画画。希望找一个能一起安静生活、也愿意聊聊人生的人。</div>
+            <div class="m-actions"><div class="mini-btn" onclick="event.stopPropagation();toast('已暂略')"><svg class="ico sm" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>暂略</div>
+              <div class="mini-btn like" onclick="event.stopPropagation();like('静姝')"><svg class="ico sm" style="stroke:#fff;" viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9C1 8 3 4.5 6.5 4.5 9 4.5 12 7 12 7s3-2.5 5.5-2.5C21 4.5 23 8 21.3 12 19 16.4 12 21 12 21z"/></svg>心动</div></div>
+          </div>
         </div>
-        <div class="match" onclick="openMatch('云岫')">
-          <div class="m-row"><div class="port" id="portC"></div>
-            <div style="flex:1;"><div class="m-name">云岫 · 31岁</div><div class="m-meta">建筑师 · 未婚 · 距你 2.6km</div></div></div>
-          <div style="margin-top:8px;"><span class="tag">旅行</span><span class="tag warm">摄影</span><span class="tag">咖啡</span></div>
-          <div class="m-desc">理性与浪漫并存，做过不少文化空间设计。期待在素心茶房遇见同频的她。</div>
-          <div class="m-actions"><div class="mini-btn" onclick="event.stopPropagation();toast('已暂略')"><svg class="ico sm" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>暂略</div>
-            <div class="mini-btn like" onclick="event.stopPropagation();like('云岫')"><svg class="ico sm" style="stroke:#fff;" viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9C1 8 3 4.5 6.5 4.5 9 4.5 12 7 12 7s3-2.5 5.5-2.5C21 4.5 23 8 21.3 12 19 16.4 12 21 12 21z"/></svg>心动</div></div>
+        <div class="match" onclick="openMatch('婉清')">
+          <div class="m-photo" style="background-image:url('suxin_girl2.png')">
+            <div class="m-photo-top">
+              <span class="m-verify"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>实名认证</span>
+              <span class="m-dist"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>2.6km</span>
+            </div>
+            <div class="m-photo-bot"><div class="m-name">婉清 · 30岁</div><div class="m-meta">钢琴老师 · 未婚 · 距你 2.6km</div></div>
+          </div>
+          <div class="m-body">
+            <div class="m-tags"><span class="tag">音乐</span><span class="tag warm">旅行</span><span class="tag">咖啡</span></div>
+            <div class="m-desc">理性与浪漫并存，在音乐学院任教。期待在素心茶房遇见同频的他。</div>
+            <div class="m-actions"><div class="mini-btn" onclick="event.stopPropagation();toast('已暂略')"><svg class="ico sm" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>暂略</div>
+              <div class="mini-btn like" onclick="event.stopPropagation();like('婉清')"><svg class="ico sm" style="stroke:#fff;" viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9C1 8 3 4.5 6.5 4.5 9 4.5 12 7 12 7s3-2.5 5.5-2.5C21 4.5 23 8 21.3 12 19 16.4 12 21 12 21z"/></svg>心动</div></div>
+          </div>
         </div>
-        <div class="match" onclick="openMatch('南絮')">
-          <div class="m-row"><div class="port" id="portD"></div>
-            <div style="flex:1;"><div class="m-name">南絮 · 27岁</div><div class="m-meta">幼教老师 · 未婚 · 距你 0.8km</div></div></div>
-          <div style="margin-top:8px;"><span class="tag">国学</span><span class="tag warm">烘焙</span><span class="tag">亲子</span></div>
-          <div class="m-desc">相信好的关系像泡茶，急不得。喜欢带小朋友读诗，也想有个自己的小家。</div>
-          <div class="m-actions"><div class="mini-btn" onclick="event.stopPropagation();toast('已暂略')"><svg class="ico sm" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>暂略</div>
-            <div class="mini-btn like" onclick="event.stopPropagation();like('南絮')"><svg class="ico sm" style="stroke:#fff;" viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9C1 8 3 4.5 6.5 4.5 9 4.5 12 7 12 7s3-2.5 5.5-2.5C21 4.5 23 8 21.3 12 19 16.4 12 21 12 21z"/></svg>心动</div></div>
+        <div class="match" onclick="openMatch('语桐')">
+          <div class="m-photo" style="background-image:url('suxin_girl3.png')">
+            <div class="m-photo-top">
+              <span class="m-verify"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>实名认证</span>
+              <span class="m-dist"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>0.8km</span>
+            </div>
+            <div class="m-photo-bot"><div class="m-name">语桐 · 26岁</div><div class="m-meta">茶艺师 · 未婚 · 距你 0.8km</div></div>
+          </div>
+          <div class="m-body">
+            <div class="m-tags"><span class="tag">茶道</span><span class="tag warm">烘焙</span><span class="tag">亲子</span></div>
+            <div class="m-desc">相信好的关系像泡茶，急不得。喜欢带朋友读诗，也想有个自己的小家。</div>
+            <div class="m-actions"><div class="mini-btn" onclick="event.stopPropagation();toast('已暂略')"><svg class="ico sm" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>暂略</div>
+              <div class="mini-btn like" onclick="event.stopPropagation();like('语桐')"><svg class="ico sm" style="stroke:#fff;" viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9C1 8 3 4.5 6.5 4.5 9 4.5 12 7 12 7s3-2.5 5.5-2.5C21 4.5 23 8 21.3 12 19 16.4 12 21 12 21z"/></svg>心动</div></div>
+          </div>
         </div>
         <div style="height:10px;"></div>
       </section>
@@ -416,7 +445,7 @@
           <div class="sec-head"><div class="sec-title">我的预约</div></div>
           <div class="booking">
             <div class="b-status"><svg class="ico sm" style="vertical-align:-3px;" viewBox="0 0 24 24"><path d="M5 13l4 4 10-11"/></svg>已确认 · 本周六</div>
-            <div class="b-title">与 清和 的茶约</div>
+            <div class="b-title">与 静姝 的茶约</div>
             <div class="b-row">
               <div class="b-item"><div class="k">门店</div><div class="v">素心茶房·城南店</div></div>
               <div class="b-item"><div class="k">时间</div><div class="v">10/12 15:00</div></div>
@@ -568,11 +597,9 @@
     <div class="sheet"><div class="s-handle"></div>
       <h3 id="mTitle">缘分详情</h3>
       <div class="port lg" id="portF" style="margin-bottom:14px;"></div>
-      <div class="d-meta"><span class="tag">国画老师</span><span class="tag warm">家庭教育</span><span class="tag">茶道</span><span class="tag">阅读</span></div>
+      <div class="d-meta"><span class="tag">实名认证</span><span class="tag warm">真实会员</span></div>
       <div class="d-body">
-        <p><b>关于 TA：</b>清和，29 岁，本地人，在一家文化机构教授国画。说话轻声细语，周末常在素心茶房临帖、看书。</p>
-        <p><b>期待的另一半：</b>真诚、能聊得来，不必多浪漫，但愿意一起把日子过慢一点。最好也喜欢传统文化或手艺。</p>
-        <p><b>真实认证：</b>实名认证 ✓ · 学历认证 ✓ · 工作认证 ✓</p>
+        <p>正在加载缘分详情…</p>
       </div>
       <div style="display:flex;gap:10px;">
         <button class="btn btn-ghost btn-block" onclick="closeOverlay('ovMatch')">返回</button>
@@ -621,7 +648,8 @@
 
 <script>
   const portraitSVG = `<svg viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e9e0cf"/><stop offset="1" stop-color="#cdbfa3"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/><circle cx="50" cy="38" r="16" fill="#b7a98c" opacity=".75"/><path d="M22 88c0-16 12-26 28-26s28 10 28 26z" fill="#b7a98c" opacity=".75"/></svg>`;
-  ['portA','portB','portC','portD','portE','portF'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=portraitSVG;});
+  const pE=document.getElementById('portE');if(pE){pE.style.backgroundImage="url('suxin_man1.png')";pE.style.backgroundSize='cover';pE.style.backgroundPosition='center top';}
+  const pA=document.getElementById('portA');if(pA){pA.style.backgroundImage="url('suxin_girl1.png')";pA.style.backgroundSize='cover';pA.style.backgroundPosition='center top';}
 
   function tick(){const d=new Date();document.getElementById('clock').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
   tick();setInterval(tick,30000);
@@ -640,7 +668,13 @@
     document.querySelector('#memberApp .screen').scrollTop=0;
   }
 
-  function openMatch(name){document.getElementById('mTitle').textContent=name+' · 缘分详情';document.getElementById('ovMatch').classList.add('show');}
+  var matchPhotos={'静姝':'suxin_girl1.png','婉清':'suxin_girl2.png','语桐':'suxin_girl3.png'};
+  var matchDetails={
+    '静姝':{tags:['插画','茶道','阅读','手作'],body:['<b>关于 TA：</b>静姝，28 岁，本地人，自由插画师。说话轻声细语，周末常在素心茶房临帖、画画。','<b>期待的另一半：</b>真诚、能聊得来，不必多浪漫，但愿意一起把日子过慢一点。最好也喜欢传统文化或手艺。','<b>真实认证：</b>实名认证 ✓ · 学历认证 ✓ · 工作认证 ✓']},
+    '婉清':{tags:['音乐','旅行','咖啡'],body:['<b>关于 TA：</b>婉清，30 岁，在音乐学院任教，钢琴老师。理性与浪漫并存，做过不少文化空间设计。','<b>期待的另一半：</b>有好奇心、尊重彼此空间，愿意一起去看更大的世界。','<b>真实认证：</b>实名认证 ✓ · 学历认证 ✓ · 工作认证 ✓']},
+    '语桐':{tags:['茶道','烘焙','亲子'],body:['<b>关于 TA：</b>语桐，26 岁，茶艺师，在素心茶房兼职教习茶礼。相信好的关系像泡茶，急不得。','<b>期待的另一半：</b>温暖、踏实，愿意一起把小家慢慢经营起来。','<b>真实认证：</b>实名认证 ✓ · 学历认证 ✓ · 工作认证 ✓']}
+  };
+  function openMatch(name){var pf=document.getElementById('portF');if(matchPhotos[name]){pf.innerHTML='';pf.style.backgroundImage="url('"+matchPhotos[name]+"')";pf.style.backgroundSize='cover';pf.style.backgroundPosition='center top';}else{pf.style.backgroundImage='';pf.innerHTML=portraitSVG;}document.getElementById('mTitle').textContent=name+' · 缘分详情';var d=matchDetails[name];if(d){var dm=document.querySelector('#ovMatch .d-meta');if(dm)dm.innerHTML=d.tags.map(t=>'<span class="tag">'+t+'</span>').join('');var db=document.querySelector('#ovMatch .d-body');if(db)db.innerHTML=d.body.map(p=>'<p>'+p+'</p>').join('');}document.getElementById('ovMatch').classList.add('show');}
   function openArticle(key){
     const data={
       guoxue:{t:'《诗经》里的婚恋观：何以琴瑟和鸣',c:'礼',g:'linear-gradient(135deg,#6F8C78,#4F6B58)',
@@ -666,11 +700,11 @@
   function likeFromDetail(){closeOverlay('ovMatch');toast('已向 TA 发起心动，等待回应');}
 
   const reviews=[
-    {type:'auth',cat:'会员认证',color:'var(--cinnabar)',badge:'b1',title:'南絮 · 学历认证',meta:'提交于 10/09 · 材料已上传',note:'用户自述：某高校艺术设计硕士，已上传学位证照片。'},
-    {type:'auth',cat:'会员认证',color:'var(--cinnabar)',badge:'b1',title:'云岫 · 工作认证',meta:'提交于 10/08 · 待核验',note:'用户自述：某建筑设计院主创，需核验在职证明。'},
+    {type:'auth',cat:'会员认证',color:'var(--cinnabar)',badge:'b1',title:'静姝 · 学历认证',meta:'提交于 10/09 · 材料已上传',note:'用户自述：某美院插画专业硕士，已上传学位证照片。'},
+    {type:'auth',cat:'会员认证',color:'var(--cinnabar)',badge:'b1',title:'婉清 · 工作认证',meta:'提交于 10/08 · 待核验',note:'用户自述：某音乐学院教师，需核验在职证明。'},
     {type:'auth',cat:'会员认证',color:'var(--cinnabar)',badge:'b1',title:'知意 · 实名认证',meta:'提交于 10/07 · 已比对',note:'身份证人像比对通过，待人工复核。'},
-    {type:'book',cat:'茶约预约',color:'var(--gold)',badge:'b3',title:'知意 × 清和 · 城南店',meta:'10/12 15:00 · 临窗竹韵',note:'双方已确认，申请占用周末热门桌位，请核桌位冲突。'},
-    {type:'book',cat:'茶约预约',color:'var(--gold)',badge:'b3',title:'南絮 × 云岫 · 湖畔店',meta:'10/13 14:00 · 2 人',note:'新发起预约，湖畔店当日剩余桌位 3。'},
+    {type:'book',cat:'茶约预约',color:'var(--gold)',badge:'b3',title:'知意 × 静姝 · 城南店',meta:'10/12 15:00 · 临窗竹韵',note:'双方已确认，申请占用周末热门桌位，请核桌位冲突。'},
+    {type:'book',cat:'茶约预约',color:'var(--gold)',badge:'b3',title:'知意 × 婉清 · 湖畔店',meta:'10/13 14:00 · 2 人',note:'新发起预约，湖畔店当日剩余桌位 3。'},
     {type:'post',cat:'内容发布',color:'var(--celadon-deep)',badge:'b2',title:'文章《慢一点，遇见对的人》',meta:'投稿人：素心随笔 · 10/09',note:'情感专栏投稿，含线下活动引导，请审核措辞与导流合规。'},
     {type:'post',cat:'内容发布',color:'var(--celadon-deep)',badge:'b2',title:'活动「国学共读会·第12期」',meta:'发起人：素心学堂 · 10/08',note:'线下活动发布申请，需核对门店容量与排期。'}
   ];
