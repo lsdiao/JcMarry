@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>素心婚恋 · 小程序原型</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#F4EFE6;
+    --paper-2:#ECE4D5;
+    --card:#FCFAF4;
+    --card-2:#F7F2E8;
+    --ink:#2A2620;
+    --ink-soft:#6E6557;
+    --ink-faint:#A89E8C;
+    --line:#E4DBC9;
+    --cinnabar:#B14430;
+    --cinnabar-deep:#8F3322;
+    --celadon:#6F8C78;
+    --celadon-deep:#4F6B58;
+    --gold:#C2A05A;
+    --shadow:0 10px 34px rgba(60,46,30,.14);
+    --shadow-sm:0 2px 12px rgba(60,46,30,.09);
+    --serif:"Noto Serif SC","Songti SC","STSong",serif;
+    --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--sans);
+    background:
+      radial-gradient(circle at 18% 12%, rgba(177,68,48,.05), transparent 40%),
+      radial-gradient(circle at 85% 88%, rgba(111,140,120,.06), transparent 42%),
+      #E7DFD0;
+    color:var(--ink);
+    display:flex;justify-content:center;align-items:flex-start;
+    min-height:100vh;padding:32px 16px;gap:32px;flex-wrap:wrap;
+  }
+  .ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px;}
+  .ico.sm{width:15px;height:15px;}
+
+  /* ===== phone : iPhone 16 Pro ===== */
+  .phone{
+    width:393px;height:852px;max-height:94vh;
+    background:var(--paper);
+    border-radius:54px;
+    box-shadow:var(--shadow), 0 0 0 12px #2c2620, 0 0 0 14px #4a4238;
+    overflow:hidden;position:relative;display:flex;flex-direction:column;
+  }
+  .island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:108px;height:31px;
+    background:#15110c;border-radius:18px;z-index:70;}
+  .statusbar{
+    height:52px;flex:0 0 52px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 30px;font-size:15px;font-weight:600;color:var(--ink);position:relative;z-index:5;background:var(--paper);
+  }
+  .statusbar .icons{display:flex;gap:7px;align-items:center;}
+  .statusbar svg{width:18px;height:13px;fill:var(--ink);}
+
+  /* ===== app containers ===== */
+  #memberApp,#adminApp{display:none;flex:1;flex-direction:column;min-height:0;}
+  #memberApp.show,#adminApp.show{display:flex;}
+  .screen{flex:1;overflow-y:auto;overflow-x:hidden;position:relative;scroll-behavior:smooth;}
+  .screen::-webkit-scrollbar{width:0;}
+  .view{display:none;animation:fade .4s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  .topbar{padding:8px 22px 14px;display:flex;align-items:flex-end;justify-content:space-between;
+    position:sticky;top:0;background:linear-gradient(var(--paper) 72%, rgba(244,239,230,0));z-index:4;}
+  .topbar .title{font-family:var(--serif);font-size:25px;font-weight:600;letter-spacing:2px;}
+  .topbar .sub{font-size:12px;color:var(--ink-faint);margin-top:3px;letter-spacing:1px;}
+  .seal{width:42px;height:42px;border-radius:9px;background:var(--cinnabar);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;
+    font-size:16px;line-height:1.05;text-align:center;box-shadow:0 3px 9px rgba(143,51,34,.35);writing-mode:vertical-rl;padding:3px;}
+
+  .sec{padding:4px 22px 22px;}
+  .sec-head{display:flex;align-items:center;justify-content:space-between;margin:14px 0 12px;}
+  .sec-title{font-family:var(--serif);font-size:17px;font-weight:600;letter-spacing:1px;display:flex;align-items:center;gap:8px;}
+  .sec-title::before{content:"";width:4px;height:16px;background:var(--cinnabar);border-radius:2px;display:inline-block;}
+  .sec-more{font-size:12px;color:var(--ink-faint);}
+
+  .greet{font-family:var(--serif);font-size:22px;font-weight:600;}
+  .greet span{color:var(--cinnabar);}
+  .greet-sub{font-size:13px;color:var(--ink-soft);margin-top:4px;}
+
+  .feature{margin-top:14px;background:var(--card);border-radius:22px;padding:18px;border:1px solid var(--line);
+    position:relative;overflow:hidden;box-shadow:var(--shadow-sm);border-left:4px solid var(--celadon);}
+  .feature::after{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;
+    background:radial-gradient(circle,rgba(111,140,120,.14),transparent 70%);border-radius:50%;}
+  .feature .feat-label{font-size:12px;color:var(--gold);letter-spacing:3px;font-weight:600;}
+  .feature .feat-row{display:flex;gap:14px;margin-top:10px;align-items:center;}
+  .feature .feat-info{flex:1;}
+  .feature .feat-name{font-family:var(--serif);font-size:19px;font-weight:600;}
+  .feature .feat-meta{font-size:12px;color:var(--ink-soft);margin-top:4px;}
+  .feature .feat-desc{font-size:13px;color:var(--ink-soft);margin-top:8px;line-height:1.6;}
+  .tag{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;background:var(--card-2);
+    color:var(--celadon-deep);border:1px solid #dfe6dd;margin:4px 5px 0 0;}
+  .tag.warm{color:var(--cinnabar-deep);background:#f7e9e4;border-color:#f0d8cf;}
+
+  .port{width:74px;height:74px;border-radius:18px;flex:0 0 74px;overflow:hidden;position:relative;
+    background:linear-gradient(150deg,#e9e0cf,#d8cbb2);display:flex;align-items:center;justify-content:center;}
+  .port.lg{width:96px;height:96px;border-radius:22px;flex-basis:96px;}
+  .port svg{width:100%;height:100%;}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--sans);
+    font-weight:600;cursor:pointer;border:none;border-radius:24px;padding:11px 18px;font-size:14px;transition:.2s;}
+  .btn-primary{background:var(--cinnabar);color:#fff;box-shadow:0 4px 12px rgba(143,51,34,.3);}
+  .btn-primary:active{transform:scale(.97);}
+  .btn-ghost{background:var(--card-2);color:var(--ink);border:1px solid var(--line);}
+  .btn-block{width:100%;}
+
+  .article{display:flex;gap:13px;background:var(--card);border-radius:18px;padding:13px;margin-bottom:12px;
+    box-shadow:var(--shadow-sm);border:1px solid var(--line);cursor:pointer;transition:.2s;}
+  .article:active{transform:scale(.99);}
+  .article .cover{width:84px;height:84px;border-radius:14px;flex:0 0 84px;display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:26px;color:#fff;font-weight:600;}
+  .article .a-info{flex:1;min-width:0;}
+  .article .a-cat{font-size:11px;color:var(--celadon-deep);font-weight:600;letter-spacing:1px;}
+  .article .a-title{font-family:var(--serif);font-size:15px;font-weight:600;margin-top:4px;line-height:1.4;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .article .a-ex{font-size:12px;color:var(--ink-faint);margin-top:6px;line-height:1.5;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .article .a-foot{font-size:11px;color:var(--ink-faint);margin-top:6px;display:flex;align-items:center;gap:5px;}
+
+  .filterbar{display:flex;gap:8px;padding:0 22px 4px;overflow-x:auto;}
+  .filterbar::-webkit-scrollbar{height:0;}
+  .chip{flex:0 0 auto;font-size:13px;padding:7px 14px;border-radius:20px;background:var(--card);
+    border:1px solid var(--line);color:var(--ink-soft);cursor:pointer;white-space:nowrap;}
+  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  .match{background:var(--card);border-radius:22px;margin:0 22px 16px;padding:16px;box-shadow:var(--shadow-sm);
+    border:1px solid var(--line);cursor:pointer;transition:.2s;position:relative;overflow:hidden;}
+  .match:active{transform:scale(.99);}
+  .match .m-row{display:flex;gap:14px;}
+  .match .m-name{font-family:var(--serif);font-size:18px;font-weight:600;}
+  .match .m-meta{font-size:12px;color:var(--ink-soft);margin-top:3px;}
+  .match .m-desc{font-size:13px;color:var(--ink-soft);margin-top:8px;line-height:1.6;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .match .m-actions{display:flex;gap:10px;margin-top:12px;}
+  .mini-btn{flex:1;padding:9px;border-radius:16px;font-size:13px;font-weight:600;text-align:center;cursor:pointer;
+    border:1px solid var(--line);background:var(--card-2);color:var(--ink-soft);display:inline-flex;align-items:center;justify-content:center;gap:5px;}
+  .mini-btn.like{background:var(--cinnabar);color:#fff;border-color:var(--cinnabar);}
+  .mini-btn:active{transform:scale(.97);}
+
+  .store{background:var(--card);border-radius:22px;margin:0 22px 16px;overflow:hidden;box-shadow:var(--shadow-sm);border:1px solid var(--line);}
+  .store .s-banner{height:120px;display:flex;align-items:flex-end;padding:14px;color:#fff;font-family:var(--serif);
+    font-size:20px;font-weight:600;letter-spacing:2px;position:relative;}
+  .store .s-body{padding:14px 16px 16px;}
+  .store .s-addr{font-size:12px;color:var(--ink-soft);margin-top:6px;display:flex;align-items:center;gap:6px;}
+  .store .s-foot{display:flex;align-items:center;justify-content:space-between;margin-top:12px;}
+
+  .booking{background:linear-gradient(135deg,#fbf6ec,#f3ebda);border-radius:22px;margin:0 22px 16px;padding:18px;
+    border:1px solid var(--line);box-shadow:var(--shadow-sm);}
+  .booking .b-status{font-size:12px;color:var(--celadon-deep);font-weight:600;letter-spacing:1px;display:flex;align-items:center;gap:5px;}
+  .booking .b-title{font-family:var(--serif);font-size:18px;font-weight:600;margin-top:6px;}
+  .booking .b-row{display:flex;gap:18px;margin-top:12px;}
+  .booking .b-item .k{font-size:11px;color:var(--ink-faint);}
+  .booking .b-item .v{font-size:14px;font-weight:600;margin-top:3px;}
+
+  .phead{background:linear-gradient(160deg,#fbf7ee,#efe6d4);padding:18px 22px 22px;border-radius:0 0 28px 28px;}
+  .phead .p-top{display:flex;gap:16px;align-items:center;}
+  .phead .p-name{font-family:var(--serif);font-size:22px;font-weight:600;}
+  .phead .p-meta{font-size:13px;color:var(--ink-soft);margin-top:5px;}
+  .phead .p-level{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--gold);
+    border:1px solid var(--gold);border-radius:14px;padding:3px 9px;margin-top:9px;font-weight:600;}
+  .progress{margin-top:16px;}
+  .progress .p-label{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);}
+  .progress .bar{height:8px;border-radius:8px;background:var(--card-2);margin-top:7px;overflow:hidden;}
+  .progress .bar i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,var(--celadon),var(--gold));}
+
+  .role-banner{margin:16px 22px 0;display:flex;align-items:center;justify-content:space-between;
+    background:linear-gradient(135deg,#fbf7ee,#f1e8d6);border:1px solid var(--line);border-radius:18px;padding:14px 16px;cursor:pointer;}
+  .role-banner:active{transform:scale(.99);}
+  .role-banner .rb-left{display:flex;align-items:center;gap:12px;}
+  .role-banner .rb-ic{width:38px;height:38px;border-radius:11px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;}
+  .role-banner .rb-t{font-size:14px;font-weight:600;}
+  .role-banner .rb-s{font-size:11px;color:var(--ink-faint);margin-top:2px;}
+
+  .plist{margin:16px 22px;}
+  .pitem{display:flex;align-items:center;justify-content:space-between;padding:15px 4px;border-bottom:1px solid var(--line);cursor:pointer;}
+  .pitem:active{background:var(--card-2);}
+  .pitem .pi-left{display:flex;align-items:center;gap:13px;}
+  .pitem .pi-ic{width:34px;height:34px;border-radius:10px;background:var(--card-2);display:flex;align-items:center;justify-content:center;color:var(--celadon-deep);}
+  .pitem .pi-name{font-size:15px;font-weight:500;}
+  .pitem .pi-sub{font-size:11px;color:var(--ink-faint);margin-top:2px;}
+  .pitem .pi-arrow{color:var(--ink-faint);}
+
+  /* enlarged photo album */
+  .album-sec{margin:18px 22px 0;}
+  .album-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;}
+  .album-head .a-title{font-size:15px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:7px;}
+  .album-head .a-title svg{width:17px;height:17px;stroke:var(--celadon-deep);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+  .album-head .a-more{font-size:12px;color:var(--celadon-deep);cursor:pointer;}
+  .album-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+  .album-photo{position:relative;aspect-ratio:3/4;border-radius:18px;overflow:hidden;background-size:cover;background-position:center top;
+    box-shadow:0 8px 22px rgba(60,46,30,.16);border:1px solid var(--line);cursor:pointer;transition:.2s;}
+  .album-photo:active{transform:scale(.985);}
+  .album-photo .ph-tag{position:absolute;left:0;right:0;bottom:0;padding:24px 12px 11px;font-size:12px;color:#fff;letter-spacing:.5px;
+    background:linear-gradient(transparent,rgba(30,22,14,.62));}
+  .album-photo .ph-ico{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.82);
+    display:flex;align-items:center;justify-content:center;color:var(--ink);}
+  .album-photo .ph-ico svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+  .tabbar{height:76px;flex:0 0 76px;background:var(--card);border-top:1px solid var(--line);
+    display:flex;padding:6px 8px 0;box-shadow:0 -4px 14px rgba(60,46,30,.06);position:relative;z-index:10;}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--ink-faint);transition:.2s;}
+  .tab svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+  .tab .t-label{font-size:11px;letter-spacing:1px;}
+  .tab.on{color:var(--cinnabar);}
+  .tab.on svg{stroke:var(--cinnabar);}
+
+  .overlay{position:absolute;inset:0;background:rgba(40,34,26,.45);z-index:30;display:none;align-items:flex-end;justify-content:center;}
+  .overlay.show{display:flex;animation:fade .25s ease;}
+  .sheet{background:var(--paper);width:100%;max-height:88%;border-radius:26px 26px 0 0;overflow-y:auto;padding:22px 22px 30px;animation:slideup .3s ease;}
+  @keyframes slideup{from{transform:translateY(40px);opacity:.6;}to{transform:none;opacity:1;}}
+  .sheet .s-handle{width:42px;height:5px;border-radius:5px;background:var(--line);margin:0 auto 16px;}
+  .sheet h3{font-family:var(--serif);font-size:20px;font-weight:600;margin:0 0 12px;letter-spacing:1px;}
+  .field{margin-bottom:14px;}
+  .field label{font-size:13px;color:var(--ink-soft);display:block;margin-bottom:6px;}
+  .field input,.field textarea,.field select{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:12px;
+    background:var(--card);font-family:var(--sans);font-size:14px;color:var(--ink);outline:none;}
+  .field input:focus,.field textarea:focus{border-color:var(--celadon);}
+  .slot-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .slot{padding:8px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:13px;cursor:pointer;}
+  .slot.on{background:var(--cinnabar);color:#fff;border-color:var(--cinnabar);}
+  .d-cover{height:170px;border-radius:18px;display:flex;align-items:center;justify-content:center;color:#fff;
+    font-family:var(--serif);font-size:30px;font-weight:600;margin-bottom:16px;}
+  .d-body p{font-size:14px;line-height:1.85;color:var(--ink-soft);margin:0 0 14px;}
+  .d-meta{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0 18px;}
+
+  #login{position:absolute;inset:0;z-index:90;background:linear-gradient(165deg,#fbf7ee 0%,#ece2cf 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:38px 34px;}
+  #login .l-seal{width:64px;height:64px;border-radius:14px;background:var(--cinnabar);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:24px;
+    writing-mode:vertical-rl;box-shadow:0 6px 16px rgba(143,51,34,.35);margin-bottom:18px;}
+  #login .l-title{font-family:var(--serif);font-size:26px;font-weight:600;letter-spacing:3px;}
+  #login .l-sub{font-size:13px;color:var(--ink-soft);margin:8px 0 30px;letter-spacing:1px;text-align:center;line-height:1.6;}
+  .role-card{width:100%;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;
+    margin-bottom:16px;cursor:pointer;box-shadow:var(--shadow-sm);display:flex;gap:15px;align-items:center;transition:.2s;}
+  .role-card:active{transform:scale(.98);}
+  .role-card .rc-ic{width:50px;height:50px;border-radius:15px;display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 50px;}
+  .role-card .rc-t{font-family:var(--serif);font-size:18px;font-weight:600;}
+  .role-card .rc-s{font-size:12px;color:var(--ink-faint);margin-top:4px;line-height:1.5;}
+
+  .admin-avatar{width:42px;height:42px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:18px;font-weight:600;}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 22px;margin-bottom:6px;}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;box-shadow:var(--shadow-sm);}
+  .stat .s-num{font-family:var(--serif);font-size:26px;font-weight:700;line-height:1;}
+  .stat .s-lab{font-size:12px;color:var(--ink-soft);margin-top:6px;}
+  .stat.c1 .s-num{color:var(--cinnabar);} .stat.c2 .s-num{color:var(--celadon-deep);}
+  .stat.c3 .s-num{color:var(--gold);} .stat.c4 .s-num{color:var(--ink);}
+  .review{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px;margin:0 22px 14px;box-shadow:var(--shadow-sm);transition:opacity .3s;}
+  .review .rv-top{display:flex;gap:13px;align-items:flex-start;}
+  .review .rv-ic{width:42px;height:42px;border-radius:12px;flex:0 0 42px;display:flex;align-items:center;justify-content:center;color:#fff;}
+  .review .rv-title{font-size:15px;font-weight:600;}
+  .review .rv-meta{font-size:12px;color:var(--ink-faint);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .review .rv-note{font-size:13px;color:var(--ink-soft);margin-top:9px;line-height:1.6;background:var(--card-2);padding:9px 11px;border-radius:10px;}
+  .review .rv-actions{display:flex;gap:10px;margin-top:12px;}
+  .badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;}
+  .badge.b1{background:#f7e9e4;color:var(--cinnabar-deep);} .badge.b2{background:#e9f0ea;color:var(--celadon-deep);} .badge.b3{background:#f6efdd;color:#9c7e3f;}
+
+  .toast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(42,38,32,.92);color:#fff;
+    padding:12px 20px;border-radius:14px;font-size:14px;z-index:100;opacity:0;pointer-events:none;transition:.25s;text-align:center;max-width:80%;}
+  .toast.show{opacity:1;}
+
+  .legend{max-width:300px;background:var(--card);border-radius:18px;padding:22px 24px;box-shadow:var(--shadow);align-self:flex-start;}
+  .legend h2{font-family:var(--serif);font-size:20px;margin:0 0 4px;letter-spacing:1px;}
+  .legend .lead{font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:16px;}
+  .legend .feat{display:flex;gap:11px;margin-bottom:13px;}
+  .legend .feat .dot{width:30px;height:30px;border-radius:9px;flex:0 0 30px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;}
+  .legend .feat .ft{font-size:14px;font-weight:600;}
+  .legend .feat .fd{font-size:12px;color:var(--ink-faint);line-height:1.5;}
+  .legend .note{font-size:12px;color:var(--ink-faint);margin-top:14px;border-top:1px dashed var(--line);padding-top:12px;line-height:1.6;}
+
+  @media(max-width:880px){body{flex-direction:column;align-items:center;padding:16px;} .legend{order:2;max-width:393px;}}
+</style>
+</head>
+<body>
+
+<!-- ============ PHONE ============ -->
+<div class="phone">
+  <div class="island"></div>
+  <div class="statusbar">
+    <span id="clock">9:41</span>
+    <span class="icons">
+      <svg viewBox="0 0 18 13"><path d="M1 9h2v3H1zM5 6h2v6H5zM9 3h2v9H9zM13 0h2v12h-2z"/></svg>
+      <svg viewBox="0 0 18 13"><path d="M9 2C5.5 2 2.7 3.6 1 6c1.7 2.4 4.5 4 8 4s6.3-1.6 8-4c-1.7-2.4-4.5-4-8-4zm0 6.5A2.5 2.5 0 119 3.5a2.5 2.5 0 010 5z"/></svg>
+      <svg viewBox="0 0 26 13"><rect x="1" y="2" width="21" height="9" rx="2" fill="none" stroke="currentColor"/><rect x="3" y="4" width="15" height="5" rx="1"/><rect x="23" y="4.5" width="2" height="4" rx="1"/></svg>
+    </span>
+  </div>
+
+  <!-- ===== LOGIN / ROLE PICKER ===== -->
+  <div id="login">
+    <div class="l-seal">素心</div>
+    <div class="l-title">素心婚恋</div>
+    <div class="l-sub">真实 · 有文化温度的婚恋服务<br/>请选择登录身份</div>
+    <div class="role-card" onclick="setRole('member')">
+      <div class="rc-ic" style="background:var(--cinnabar);">
+        <svg class="ico" style="stroke:#fff;" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20a7 7 0 0114 0"/></svg>
+      </div>
+      <div><div class="rc-t">会员入口</div><div class="rc-s">浏览缘分 · 择偶匹配 · 茶约预约 · 管理档案</div></div>
+    </div>
+    <div class="role-card" onclick="setRole('admin')">
+      <div class="rc-ic" style="background:var(--ink);">
+        <svg class="ico" style="stroke:#fff;" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+      </div>
+      <div><div class="rc-t">管理员入口</div><div class="rc-s">会员认证审核 · 茶约审核 · 内容发布审核</div></div>
+    </div>
+  </div>
+
+  <!-- ===== MEMBER APP ===== -->
+  <div id="memberApp">
+    <div class="screen">
+      <!-- View: 缘起 -->
+      <section class="view active" id="v-home">
+        <div class="topbar">
+          <div><div class="title">缘起</div><div class="sub">素心茶房 · 真实有温度</div></div>
+          <div class="seal">素心</div>
+        </div>
+        <div class="sec">
+          <div class="greet">午后安好，<span>知意</span></div>
+          <div class="greet-sub">今日宜相见 · 已有 3 位缘分与你契合</div>
+          <div class="feature">
+            <div class="feat-label">今 日 缘 分</div>
+            <div class="feat-row">
+              <div class="port" id="portA"></div>
+              <div class="feat-info">
+                <div class="feat-name">清和 · 29岁</div>
+                <div class="feat-meta">国画老师 · 距你 1.2km · 茶社常客</div>
+                <div style="margin-top:8px;"><span class="tag">国学</span><span class="tag warm">家庭教育</span><span class="tag">茶道</span></div>
+              </div>
+            </div>
+            <div class="feat-desc">「愿得一人，闲时煮茶，忙时各自发光。」在素心茶房等你一同读一本旧书。</div>
+            <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="openMatch('清和')">查看这份缘分</button>
+          </div>
+        </div>
+        <div class="sec">
+          <div class="sec-head"><div class="sec-title">情感 · 国学 · 家教</div><div class="sec-more" onclick="switchTab('book')">线下茶约 ›</div></div>
+          <div class="article" onclick="openArticle('guoxue')">
+            <div class="cover" style="background:linear-gradient(135deg,#6F8C78,#4F6B58);">礼</div>
+            <div class="a-info">
+              <div class="a-cat">国 学</div>
+              <div class="a-title">《诗经》里的婚恋观：何以琴瑟和鸣</div>
+              <div class="a-ex">从"关关雎鸠"到"宜其室家"，古人如何看待一段长久的关系。</div>
+              <div class="a-foot"><svg class="ico sm" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>2.3k · 素心学堂</div>
+            </div>
+          </div>
+          <div class="article" onclick="openArticle('jiajiao')">
+            <div class="cover" style="background:linear-gradient(135deg,#B14430,#8F3322);">家</div>
+            <div class="a-info">
+              <div class="a-cat">家 庭 教 育</div>
+              <div class="a-title">婚前聊清的三件事，比甜言更重要</div>
+              <div class="a-ex">金钱观、边界感与原生家庭——素心顾问的面对面建议。</div>
+              <div class="a-foot"><svg class="ico sm" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>1.8k · 素心顾问</div>
+            </div>
+          </div>
+          <div class="article" onclick="openArticle('qinggan')">
+            <div class="cover" style="background:linear-gradient(135deg,#C2A05A,#9c7e3f);">心</div>
+            <div class="a-info">
+              <div class="a-cat">情 感</div>
+              <div class="a-title">慢一点，反而遇见对的人</div>
+              <div class="a-ex">线下相亲不是相亲角，而是一杯茶的时间，把节奏交还给自己。</div>
+              <div class="a-foot"><svg class="ico sm" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>3.1k · 素心随笔</div>
+            </div>
+          </div>
+        </div>
+        <div style="height:10px;"></div>
+      </section>
+
+      <!-- View: 觅缘 -->
+      <section class="view" id="v-match">
+        <div class="topbar">
+          <div><div class="title">觅缘</div><div class="sub">择偶匹配 · 真实认证会员</div></div>
+          <div class="seal" style="background:var(--celadon);box-shadow:0 3px 8px rgba(79,107,88,.35);">觅</div>
+        </div>
+        <div class="filterbar" style="margin-bottom:12px;">
+          <div class="chip on">全部</div><div class="chip">28-32岁</div><div class="chip">3km内</div><div class="chip">本科+</div><div class="chip">爱茶道</div><div class="chip">更多</div>
+        </div>
+        <div class="match" onclick="openMatch('清和')">
+          <div class="m-row"><div class="port" id="portB"></div>
+            <div style="flex:1;"><div class="m-name">清和 · 29岁</div><div class="m-meta">国画老师 · 未婚 · 距你 1.2km</div></div></div>
+          <div style="margin-top:8px;"><span class="tag">国学</span><span class="tag warm">家庭教育</span><span class="tag">茶道</span><span class="tag">阅读</span></div>
+          <div class="m-desc">性格温和，周末爱去茶社临帖。希望找一个能一起安静生活、也愿意聊聊人生的人。</div>
+          <div class="m-actions"><div class="mini-btn" onclick="event.stopPropagation();toast('已暂略')"><svg class="ico sm" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>暂略</div>
+            <div class="mini-btn like" onclick="event.stopPropagation();like('清和')"><svg class="ico sm" style="stroke:#fff;" viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9C1 8 3 4.5 6.5 4.5 9 4.5 12 7 12 7s3-2.5 5.5-2.5C21 4.5 23 8 21.3 12 19 16.4 12 21 12 21z"/></svg>心动</div></div>
+        </div>
+        <div class="match" onclick="openMatch('云岫')">
+          <div class="m-row"><div class="port" id="portC"></div>
+            <div style="flex:1;"><div class="m-name">云岫 · 31岁</div><div class="m-meta">建筑师 · 未婚 · 距你 2.6km</div></div></div>
+          <div style="margin-top:8px;"><span class="tag">旅行</span><span class="tag warm">摄影</span><span class="tag">咖啡</span></div>
+          <div class="m-desc">理性与浪漫并存，做过不少文化空间设计。期待在素心茶房遇见同频的她。</div>
+          <div class="m-actions"><div class="mini-btn" onclick="event.stopPropagation();toast('已暂略')"><svg class="ico sm" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>暂略</div>
+            <div class="mini-btn like" onclick="event.stopPropagation();like('云岫')"><svg class="ico sm" style="stroke:#fff;" viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9C1 8 3 4.5 6.5 4.5 9 4.5 12 7 12 7s3-2.5 5.5-2.5C21 4.5 23 8 21.3 12 19 16.4 12 21 12 21z"/></svg>心动</div></div>
+        </div>
+        <div class="match" onclick="openMatch('南絮')">
+          <div class="m-row"><div class="port" id="portD"></div>
+            <div style="flex:1;"><div class="m-name">南絮 · 27岁</div><div class="m-meta">幼教老师 · 未婚 · 距你 0.8km</div></div></div>
+          <div style="margin-top:8px;"><span class="tag">国学</span><span class="tag warm">烘焙</span><span class="tag">亲子</span></div>
+          <div class="m-desc">相信好的关系像泡茶，急不得。喜欢带小朋友读诗，也想有个自己的小家。</div>
+          <div class="m-actions"><div class="mini-btn" onclick="event.stopPropagation();toast('已暂略')"><svg class="ico sm" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>暂略</div>
+            <div class="mini-btn like" onclick="event.stopPropagation();like('南絮')"><svg class="ico sm" style="stroke:#fff;" viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9C1 8 3 4.5 6.5 4.5 9 4.5 12 7 12 7s3-2.5 5.5-2.5C21 4.5 23 8 21.3 12 19 16.4 12 21 12 21z"/></svg>心动</div></div>
+        </div>
+        <div style="height:10px;"></div>
+      </section>
+
+      <!-- View: 茶约 -->
+      <section class="view" id="v-book">
+        <div class="topbar">
+          <div><div class="title">茶约</div><div class="sub">线下见面预约 · 素心茶房</div></div>
+          <div class="seal" style="background:var(--gold);box-shadow:0 3px 8px rgba(156,126,63,.35);">约</div>
+        </div>
+        <div class="sec">
+          <div class="sec-head"><div class="sec-title">我的预约</div></div>
+          <div class="booking">
+            <div class="b-status"><svg class="ico sm" style="vertical-align:-3px;" viewBox="0 0 24 24"><path d="M5 13l4 4 10-11"/></svg>已确认 · 本周六</div>
+            <div class="b-title">与 清和 的茶约</div>
+            <div class="b-row">
+              <div class="b-item"><div class="k">门店</div><div class="v">素心茶房·城南店</div></div>
+              <div class="b-item"><div class="k">时间</div><div class="v">10/12 15:00</div></div>
+              <div class="b-item"><div class="k">桌位</div><div class="v">临窗·竹韵</div></div>
+            </div>
+            <button class="btn btn-ghost btn-block" style="margin-top:14px;" onclick="toast('已为您转接客服改约')">修改预约</button>
+          </div>
+        </div>
+        <div class="sec">
+          <div class="sec-head"><div class="sec-title">就近门店</div><div class="sec-more">全部 6 家 ›</div></div>
+          <div class="store">
+            <div class="s-banner" style="background:linear-gradient(135deg,#6F8C78,#4F6B58);">素心茶房 · 城南店</div>
+            <div class="s-body">
+              <div class="s-addr"><svg class="ico sm" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>文心路 88 号 · 距你 1.2km · 可容纳 40 人</div>
+              <div class="s-foot"><span style="font-size:13px;color:var(--ink-soft);">今日剩余桌位 6</span>
+                <button class="btn btn-primary" style="padding:8px 18px;font-size:13px;" onclick="openBooking('素心茶房·城南店')">预约</button></div>
+            </div>
+          </div>
+          <div class="store">
+            <div class="s-banner" style="background:linear-gradient(135deg,#B14430,#8F3322);">素心茶房 · 湖畔店</div>
+            <div class="s-body">
+              <div class="s-addr"><svg class="ico sm" viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11a7 7 0 10-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>听湖巷 12 号 · 距你 3.4km · 可容纳 28 人</div>
+              <div class="s-foot"><span style="font-size:13px;color:var(--ink-soft);">今日剩余桌位 3</span>
+                <button class="btn btn-primary" style="padding:8px 18px;font-size:13px;" onclick="openBooking('素心茶房·湖畔店')">预约</button></div>
+            </div>
+          </div>
+        </div>
+        <div style="height:10px;"></div>
+      </section>
+
+      <!-- View: 吾心 -->
+      <section class="view" id="v-me">
+        <div class="phead">
+          <div class="p-top">
+            <div class="port lg" id="portE"></div>
+            <div>
+              <div class="p-name">知意 · 28岁</div>
+              <div class="p-meta">设计师 · 未婚 · 现居城南</div>
+              <div class="p-level"><svg class="ico sm" style="stroke:var(--gold);width:13px;height:13px;" viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.4 4.2 1.2 6L12 17l-5.4 2.5 1.2-6L3.4 9.3l6-.7z"/></svg>知音会员</div>
+            </div>
+          </div>
+          <div class="progress">
+            <div class="p-label"><span>会员档案完整度</span><span>82%</span></div>
+            <div class="bar"><i style="width:82%;"></i></div>
+          </div>
+        </div>
+
+        <div class="role-banner" onclick="setRole('admin')">
+          <div class="rb-left"><div class="rb-ic"><svg class="ico" style="stroke:#fff;width:20px;height:20px;" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+            <div><div class="rb-t">切换为管理员</div><div class="rb-s">进入审核后台</div></div></div>
+          <div class="pi-arrow"><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+        </div>
+
+        <div class="album-sec">
+          <div class="album-head">
+            <div class="a-title"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5L5 20"/></svg>生活相册</div>
+            <div class="a-more" onclick="toast('查看全部 9 张')">全部 9 张</div>
+          </div>
+          <div class="album-grid">
+            <div class="album-photo" style="background-image:url('suxin_man1.png')" onclick="toast('查看大图 · 茶房日常')">
+              <div class="ph-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></div>
+              <div class="ph-tag">茶房日常</div>
+            </div>
+            <div class="album-photo" style="background-image:url('suxin_man2.png')" onclick="toast('查看大图 · 山水之间')">
+              <div class="ph-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></div>
+              <div class="ph-tag">山水之间</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="plist">
+          <div class="pitem" onclick="toast('进入基本资料编辑')">
+            <div class="pi-left"><div class="pi-ic"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="11" r="2"/><path d="M13 10h5M13 13.5h4M5.5 15.5h6"/></svg></div>
+              <div><div class="pi-name">基本资料</div><div class="pi-sub">头像 · 年龄 · 职业 · 户籍</div></div></div>
+            <div class="pi-arrow"><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+          </div>
+          <div class="pitem" onclick="toast('进入择偶条件设置')">
+            <div class="pi-left"><div class="pi-ic"><svg class="ico" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0112 0"/><path d="M16 5.5a3 3 0 010 5.5"/><path d="M18 20a6 6 0 00-3-5.2"/></svg></div>
+              <div><div class="pi-name">择偶条件</div><div class="pi-sub">年龄 · 距离 · 学历 · 性格</div></div></div>
+            <div class="pi-arrow"><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+          </div>
+          <div class="pitem" onclick="toast('进入兴趣标签')">
+            <div class="pi-left"><div class="pi-ic"><svg class="ico" viewBox="0 0 24 24"><path d="M11 20A7 7 0 014 13c0-5 4-9 9-9 0 5-2 9-7 10"/><path d="M11 20c0-4 2-7 6-9"/></svg></div>
+              <div><div class="pi-name">兴趣标签</div><div class="pi-sub">茶道 · 国学 · 旅行 已选 6 项</div></div></div>
+            <div class="pi-arrow"><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+          </div>
+          <div class="pitem" onclick="toast('真实认证中')">
+            <div class="pi-left"><div class="pi-ic"><svg class="ico" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+              <div><div class="pi-name">真实认证</div><div class="pi-sub">实名 · 学历 · 工作 已认证 2/3</div></div></div>
+            <div class="pi-arrow"><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+          </div>
+          <div class="pitem" onclick="toast('编辑自我介绍')">
+            <div class="pi-left"><div class="pi-ic"><svg class="ico" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/></svg></div>
+              <div><div class="pi-name">自我介绍</div><div class="pi-sub">一句话，让缘分读懂你</div></div></div>
+            <div class="pi-arrow"><svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></div>
+          </div>
+        </div>
+        <div class="sec" style="padding-top:0;"><button class="btn btn-primary btn-block" onclick="toast('档案已保存')">保存并公开档案</button></div>
+        <div style="height:10px;"></div>
+      </section>
+    </div>
+
+    <div class="tabbar">
+      <div class="tab on" data-tab="home" onclick="switchTab('home')">
+        <svg viewBox="0 0 24 24"><path d="M12 3l8 7v10a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1V10z"/></svg><span class="t-label">缘起</span></div>
+      <div class="tab" data-tab="match" onclick="switchTab('match')">
+        <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9C1 8 3 4.5 6.5 4.5 9 4.5 12 7 12 7s3-2.5 5.5-2.5C21 4.5 23 8 21.3 12 19 16.4 12 21 12 21z"/></svg><span class="t-label">觅缘</span></div>
+      <div class="tab" data-tab="book" onclick="switchTab('book')">
+        <svg viewBox="0 0 24 24"><path d="M5 8h11a3 3 0 010 6H8"/><path d="M5 8V6a2 2 0 012-2h9a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2z"/><path d="M5 20h11"/></svg><span class="t-label">茶约</span></div>
+      <div class="tab" data-tab="me" onclick="switchTab('me')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0114 0"/></svg><span class="t-label">吾心</span></div>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN APP ===== -->
+  <div id="adminApp">
+    <div class="screen">
+      <div class="topbar">
+        <div><div class="title">管理后台</div><div class="sub">素心婚恋 · 审核中心</div></div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="admin-avatar">管</div>
+          <div class="btn btn-ghost" style="padding:8px 14px;font-size:13px;" onclick="setRole('member')">切换账号</div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat c1"><div class="s-num">12</div><div class="s-lab">待审认证</div></div>
+        <div class="stat c2"><div class="s-num">5</div><div class="s-lab">待审预约</div></div>
+        <div class="stat c3"><div class="s-num">3</div><div class="s-lab">待审内容</div></div>
+        <div class="stat c4"><div class="s-num">8</div><div class="s-lab">今日新增会员</div></div>
+      </div>
+
+      <div class="sec" style="padding-bottom:6px;">
+        <div class="sec-head"><div class="sec-title">审核队列</div></div>
+        <div class="filterbar" style="padding:0;">
+          <div class="chip on" data-rv="all" onclick="filterReview(this)">全部</div>
+          <div class="chip" data-rv="auth" onclick="filterReview(this)">会员认证</div>
+          <div class="chip" data-rv="book" onclick="filterReview(this)">茶约预约</div>
+          <div class="chip" data-rv="post" onclick="filterReview(this)">内容发布</div>
+        </div>
+      </div>
+      <div id="reviewList"></div>
+      <div style="height:16px;"></div>
+    </div>
+  </div>
+
+  <!-- ===== overlays (member) ===== -->
+  <div class="overlay" id="ovMatch">
+    <div class="sheet"><div class="s-handle"></div>
+      <h3 id="mTitle">缘分详情</h3>
+      <div class="port lg" id="portF" style="margin-bottom:14px;"></div>
+      <div class="d-meta"><span class="tag">国画老师</span><span class="tag warm">家庭教育</span><span class="tag">茶道</span><span class="tag">阅读</span></div>
+      <div class="d-body">
+        <p><b>关于 TA：</b>清和，29 岁，本地人，在一家文化机构教授国画。说话轻声细语，周末常在素心茶房临帖、看书。</p>
+        <p><b>期待的另一半：</b>真诚、能聊得来，不必多浪漫，但愿意一起把日子过慢一点。最好也喜欢传统文化或手艺。</p>
+        <p><b>真实认证：</b>实名认证 ✓ · 学历认证 ✓ · 工作认证 ✓</p>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost btn-block" onclick="closeOverlay('ovMatch')">返回</button>
+        <button class="btn btn-primary btn-block" onclick="likeFromDetail()"><svg class="ico sm" style="stroke:#fff;" viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9C1 8 3 4.5 6.5 4.5 9 4.5 12 7 12 7s3-2.5 5.5-2.5C21 4.5 23 8 21.3 12 19 16.4 12 21 12 21z"/></svg>向 TA 发起心动</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="ovArticle">
+    <div class="sheet"><div class="s-handle"></div>
+      <h3 id="aTitle">文章详情</h3>
+      <div class="d-cover" id="aCover">礼</div>
+      <div class="d-body" id="aBody"></div>
+      <button class="btn btn-primary btn-block" onclick="closeOverlay('ovArticle')">收起</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="ovBooking">
+    <div class="sheet"><div class="s-handle"></div>
+      <h3 id="bStore">预约茶约</h3>
+      <div class="field"><label>选择日期</label><select><option>本周六 10/12</option><option>本周日 10/13</option><option>下周三 10/16</option></select></div>
+      <div class="field"><label>时段</label><div class="slot-row">
+        <div class="slot on" onclick="pickSlot(this)">10:00</div><div class="slot" onclick="pickSlot(this)">14:00</div>
+        <div class="slot" onclick="pickSlot(this)">15:00</div><div class="slot" onclick="pickSlot(this)">19:00</div></div></div>
+      <div class="field"><label>同行人数</label><div class="slot-row">
+        <div class="slot on" onclick="pickSlot(this)">2 人</div><div class="slot" onclick="pickSlot(this)">4 人</div><div class="slot" onclick="pickSlot(this)">6 人</div></div></div>
+      <div class="field"><label>备注（可选）</label><textarea rows="2" placeholder="例如：希望临窗安静座位"></textarea></div>
+      <button class="btn btn-primary btn-block" onclick="submitBooking()">提交预约</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<!-- ===== Legend ===== -->
+<div class="legend">
+  <h2>素心婚恋 · 原型说明</h2>
+  <div class="lead">新中式茶社美学，宣纸底 + 墨色 + 朱砂/青瓷。iPhone 16 Pro 基准（393×852·灵动岛）。图标全部为线性 SVG，无 emoji。</div>
+  <div class="feat"><div class="dot" style="background:var(--cinnabar)">缘</div><div><div class="ft">情感内容展示</div><div class="fd">首页「缘起」：国学 / 家庭教育 / 情感文章流</div></div></div>
+  <div class="feat"><div class="dot" style="background:var(--celadon)">觅</div><div><div class="ft">择偶匹配</div><div class="fd">「觅缘」：筛选条件 + 会员卡片 + 心动</div></div></div>
+  <div class="feat"><div class="dot" style="background:var(--gold)">约</div><div><div class="ft">线下见面预约</div><div class="fd">「茶约」：门店列表 + 预约表单 + 我的预约</div></div></div>
+  <div class="feat"><div class="dot" style="background:#6E6557">心</div><div><div class="ft">会员档案管理</div><div class="fd">「吾心」：资料 / 择偶 / 认证 / 相册</div></div></div>
+  <div class="feat"><div class="dot" style="background:var(--ink)">管</div><div><div class="ft">管理员审核后台</div><div class="fd">登录选「管理员」：认证 / 茶约 / 内容 审核队列</div></div></div>
+  <div class="note">体验：首屏选择「会员 / 管理员」进入；会员端「吾心」可一键切换为管理员。审核卡片可点「通过 / 驳回」。后续可导入 Ardot 做标注，或拆成 WXML/WXSS。</div>
+</div>
+
+<script>
+  const portraitSVG = `<svg viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e9e0cf"/><stop offset="1" stop-color="#cdbfa3"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/><circle cx="50" cy="38" r="16" fill="#b7a98c" opacity=".75"/><path d="M22 88c0-16 12-26 28-26s28 10 28 26z" fill="#b7a98c" opacity=".75"/></svg>`;
+  ['portA','portB','portC','portD','portE','portF'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=portraitSVG;});
+
+  function tick(){const d=new Date();document.getElementById('clock').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+  tick();setInterval(tick,30000);
+
+  function setRole(role){
+    document.getElementById('login').style.display='none';
+    const m=document.getElementById('memberApp'), a=document.getElementById('adminApp');
+    if(role==='member'){m.classList.add('show');a.classList.remove('show');switchTab('home');}
+    else{a.classList.add('show');m.classList.remove('show');renderReviews('all');}
+  }
+
+  function switchTab(name){
+    document.querySelectorAll('#memberApp .view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('v-'+name).classList.add('active');
+    document.querySelectorAll('#memberApp .tab').forEach(t=>t.classList.toggle('on',t.dataset.tab===name));
+    document.querySelector('#memberApp .screen').scrollTop=0;
+  }
+
+  function openMatch(name){document.getElementById('mTitle').textContent=name+' · 缘分详情';document.getElementById('ovMatch').classList.add('show');}
+  function openArticle(key){
+    const data={
+      guoxue:{t:'《诗经》里的婚恋观：何以琴瑟和鸣',c:'礼',g:'linear-gradient(135deg,#6F8C78,#4F6B58)',
+        b:['"关关雎鸠，在河之洲。"《诗经》开篇即言婚恋，却从不急于结局。古人把爱视为一种需要耐心与修养的关系。','琴瑟和鸣，并非没有分歧，而是愿意为彼此调音。素心学堂认为，好的亲密关系，底色是尊重与共同成长。','每周六下午，素心茶房设有国学共读会，欢迎独自前来的你，先与一本书相识。']},
+      jiajiao:{t:'婚前聊清的三件事，比甜言更重要',c:'家',g:'linear-gradient(135deg,#B14430,#8F3322)',
+        b:['金钱观、边界感与原生家庭，是三件容易被浪漫掩盖、却决定长久的话题。','素心顾问建议：在正式确立关系前，用三次平静的对话聊清它们，好过婚后的一次争吵。','我们的线下顾问可为你提供一对一面谈，在茶香中把话说开。']},
+      qinggan:{t:'慢一点，反而遇见对的人',c:'心',g:'linear-gradient(135deg,#C2A05A,#9c7e3f)',
+        b:['线下的意义，在于让节奏慢下来。一杯茶的时间，足够你看清一个人是否同频。','素心不办喧闹的相亲角，只提供安静的见面空间与文化活动，把主动权交还给你。','相信对的人值得等待，也值得被认真地对待。']}
+    };
+    const d=data[key];
+    document.getElementById('aTitle').textContent=d.t;
+    const cov=document.getElementById('aCover');cov.textContent=d.c;cov.style.background=d.g;
+    document.getElementById('aBody').innerHTML=d.b.map(p=>'<p>'+p+'</p>').join('');
+    document.getElementById('ovArticle').classList.add('show');
+  }
+  function openBooking(store){document.getElementById('bStore').textContent='预约 · '+store;document.getElementById('ovBooking').classList.add('show');}
+  function closeOverlay(id){document.getElementById(id).classList.remove('show');}
+  document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show');}));
+
+  function pickSlot(el){el.parentElement.querySelectorAll('.slot').forEach(s=>s.classList.remove('on'));el.classList.add('on');}
+  function submitBooking(){closeOverlay('ovBooking');toast('预约已提交，顾问将与你确认');}
+  function like(name){toast('已向 '+name+' 发起心动');}
+  function likeFromDetail(){closeOverlay('ovMatch');toast('已向 TA 发起心动，等待回应');}
+
+  const reviews=[
+    {type:'auth',cat:'会员认证',color:'var(--cinnabar)',badge:'b1',title:'南絮 · 学历认证',meta:'提交于 10/09 · 材料已上传',note:'用户自述：某高校艺术设计硕士，已上传学位证照片。'},
+    {type:'auth',cat:'会员认证',color:'var(--cinnabar)',badge:'b1',title:'云岫 · 工作认证',meta:'提交于 10/08 · 待核验',note:'用户自述：某建筑设计院主创，需核验在职证明。'},
+    {type:'auth',cat:'会员认证',color:'var(--cinnabar)',badge:'b1',title:'知意 · 实名认证',meta:'提交于 10/07 · 已比对',note:'身份证人像比对通过，待人工复核。'},
+    {type:'book',cat:'茶约预约',color:'var(--gold)',badge:'b3',title:'知意 × 清和 · 城南店',meta:'10/12 15:00 · 临窗竹韵',note:'双方已确认，申请占用周末热门桌位，请核桌位冲突。'},
+    {type:'book',cat:'茶约预约',color:'var(--gold)',badge:'b3',title:'南絮 × 云岫 · 湖畔店',meta:'10/13 14:00 · 2 人',note:'新发起预约，湖畔店当日剩余桌位 3。'},
+    {type:'post',cat:'内容发布',color:'var(--celadon-deep)',badge:'b2',title:'文章《慢一点，遇见对的人》',meta:'投稿人：素心随笔 · 10/09',note:'情感专栏投稿，含线下活动引导，请审核措辞与导流合规。'},
+    {type:'post',cat:'内容发布',color:'var(--celadon-deep)',badge:'b2',title:'活动「国学共读会·第12期」',meta:'发起人：素心学堂 · 10/08',note:'线下活动发布申请，需核对门店容量与排期。'}
+  ];
+  function renderReviews(filter){
+    const wrap=document.getElementById('reviewList');wrap.innerHTML='';
+    reviews.filter(r=>filter==='all'||r.type===filter).forEach(r=>{
+      const el=document.createElement('div');el.className='review';
+      const ic=r.type==='auth'?'<path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>':r.type==='book'?'<rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 9h18M8 3v3M16 3v3"/>':'<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h6"/>';
+      el.innerHTML=`<div class="rv-top">
+          <div class="rv-ic" style="background:${r.color}"><svg class="ico" style="stroke:#fff;" viewBox="0 0 24 24">${ic}</svg></div>
+          <div style="flex:1;"><div class="rv-title">${r.title}</div><div class="rv-meta">${r.meta} · <span class="badge ${r.badge}">${r.cat}</span></div></div>
+        </div>
+        <div class="rv-note">${r.note}</div>
+        <div class="rv-actions">
+          <button class="mini-btn" onclick="rejectR(this)"><svg class="ico sm" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>驳回</button>
+          <button class="mini-btn like" onclick="approveR(this)"><svg class="ico sm" style="stroke:#fff;" viewBox="0 0 24 24"><path d="M5 13l4 4 10-11"/></svg>通过</button>
+        </div>`;
+      wrap.appendChild(el);
+    });
+  }
+  function filterReview(el){
+    document.querySelectorAll('#adminApp .chip').forEach(c=>c.classList.remove('on'));
+    el.classList.add('on');renderReviews(el.dataset.rv);
+  }
+  function approveR(btn){btn.closest('.review').style.opacity='.45';toast('已通过该项审核');}
+  function rejectR(btn){btn.closest('.review').style.opacity='.45';toast('已驳回，已通知提交人');}
+
+  let toastTimer;
+  function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1800);}
+</script>
+</body>
+</html>
