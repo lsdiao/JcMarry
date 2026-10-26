@@ -484,7 +484,9 @@ const I = {
   hotel:'<path d="M3 18V8h12a3 3 0 0 1 3 3v7M3 13h18M7 11h3"/>',
   image:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="m4 17 5-5 4 4 3-3 4 4"/>',
   edit:'<path d="M4 20h4L18 10l-4-4L4 16v4Z"/><path d="m13 5 4 4"/>',
-  trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'
+  trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  sound:'<path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16 8.5a4 4 0 0 1 0 7M18.7 6a7 7 0 0 1 0 12"/>',
+  mute:'<path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="m16 9 5 6M21 9l-5 6"/>'
 };
 function ic(n,s){s=s||20;return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+(I[n]||'')+'</svg>';}
 
@@ -498,7 +500,7 @@ const state = { id:'m-home', stack:[], role:'member', spec:false, signed:false, 
 /* 可变数据层：产品 / 案例由管理后台增删改查维护，首页与列表读取此处（演示态，真实项目落云数据库） */
 const PROD_ATTRS=[
   {series:'铭郡系列',firm:'适中',size:'1.8m × 2.0m',badge:'旗舰系列',store:'Sealy丝涟床垫(常熟好得家精品馆)'},
-  {series:'铭郡系列',firm:'偏硬',size:'1.8m × 2.0m',badge:'旗舰系列',store:'丝涟床垫常熟喜来乐店'},
+  {series:'铭郡系列',firm:'偏硬',size:'1.8m × 2.0m',badge:'旗舰系列',store:'丝涟床垫常熟禧徕乐店'},
   {series:'铭郡系列',firm:'偏软',size:'1.5m × 2.0m',badge:'热销',store:'Sealy丝涟床垫(常熟好得家精品馆)'}
 ];
 state.products = SEED.products.map((p,i)=>Object.assign({}, p, PROD_ATTRS[i]||PROD_ATTRS[0]));
@@ -509,14 +511,14 @@ state.prodFilter = {series:'', firm:'', size:''};
 /* 门店：首页门店地址区与「门店上架产品」详情页的数据源；产品通过 store 字段归属门店 */
 state.stores = [
   {name:'Sealy丝涟床垫(常熟好得家精品馆)', short:'好得家精品馆', addr:'常熟市琴湖路 88 号 好得家精品馆', hours:'营业中 09:30–21:00', phone:'0512-5200 0000', lng:120.7412, lat:31.6543, trial:true},
-  {name:'丝涟床垫常熟喜来乐店', short:'喜来乐店', addr:'苏州市常熟市禧徕乐国际家居生活广场1期二楼', hours:'营业中 10:00–20:30', phone:'0512-5200 1111', lng:120.7305, lat:31.6489, trial:true}
+  {name:'丝涟床垫常熟禧徕乐店', short:'禧徕乐店', addr:'苏州市常熟市禧徕乐国际家居生活广场1期二楼', hours:'营业中 10:00–20:30', phone:'0512-5200 1111', lng:120.7305, lat:31.6489, trial:true}
 ];
 state.curStore = 0;
 state.curOrder = 0;
 state.orders = [
   {no:'SL202610230017', status:'配送中', statusTag:'blue', product:'皇冠假日 · 独立袋装弹簧床垫', spec:'1.8m × 2.0m · 偏硬 · × 1', store:'好得家精品馆', date:'10-23', eta:'预计 10-26 送达', type:'order'},
   {no:'SL202609150007', status:'处理中', statusTag:'gold', product:'铭郡系列 · 铭臻Pro', spec:'1.8m × 2.0m', store:'好得家精品馆', date:'09-15', eta:'售后工单跟进中', type:'aftersale'},
-  {no:'SL202608010002', status:'已完成', statusTag:'', product:'铭郡系列 · 铭钰Pro', spec:'1.5m × 2.0m', store:'喜来乐店', date:'08-01', eta:'已结案', type:'order'}
+  {no:'SL202608010002', status:'已完成', statusTag:'', product:'铭郡系列 · 铭钰Pro', spec:'1.5m × 2.0m', store:'禧徕乐店', date:'08-01', eta:'已结案', type:'order'}
 ];
 /* 积分中心 · 花积分兑换商品；支持管理后台（a-goods）增删改查，含实物图片 */
 state.goods = [
@@ -543,6 +545,7 @@ state.tickets = [
 /* 回访记录上传上下文：fuTarget = 当前回访所属对象的 followups 数组引用；fuAttach = 本次新增的附件 */
 state.fuTarget = null;
 state.fuAttach = [];
+state.videoMuted = true; /* 首页品牌视频默认静音，可手动开声音 */
 state.clients = [
   {name:'王丽华',phone:'138****2341',advisor:'好得家旗舰店 · 秦怡',status:'距生日 2 天',tag:'生日关怀',points:980,last:'10-22 跟进',addr:'常熟市琴湖路 88 号 1-1101',
     orders:[{no:'SL202610200001',type:'order',product:'铭郡系列 · 铭盛Pro',size:'1.8m × 2.0m',store:'好得家旗舰店',status:'已送达',date:'10-20'}],
@@ -592,12 +595,17 @@ S['m-home'] = {
     '状态':'已包含：加载骨架（首屏卡片）、消息未读红点、无归属顾问时的空顾问卡（PRD EX 清单）。',
     '依据':'FR-03/04 一对一归属 · FR-24 产品到店询价（首页不出现价格）'
   },
+  onMount(){
+    const v = document.getElementById('homeVideo');
+    if(v){ try{ v.muted = state.videoMuted; if(!state.videoMuted) v.play().catch(()=>{}); }catch(e){} }
+  },
   html(){
     return `
     <div class="pad" style="padding-top:var(--s2)">
       <div class="stg press" style="--i:0;margin-top:var(--s2);border-radius:var(--r-md);overflow:hidden;background:#0e3a6e;position:relative;aspect-ratio:16/9;min-height:188px">
-        <video src="assets/video.mp4" autoplay muted loop playsinline preload="auto" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block"></video>
+        <video id="homeVideo" src="assets/video.mp4" autoplay muted loop playsinline preload="auto" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block"></video>
         <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,28,56,.55),rgba(8,28,56,.30))"></div>
+        <button id="videoSoundBtn" class="iconbtn press" onclick="toggleVideoSound()" style="position:absolute;top:10px;right:10px;z-index:4;width:34px;height:34px;border-radius:999px;background:rgba(0,0,0,.38);color:#fff;border:1px solid rgba(255,255,255,.25);display:grid;place-items:center" aria-label="视频声音开关">${ic(state.videoMuted?'mute':'sound',16)}</button>
         <div class="glow" style="position:absolute;top:-40px;right:-30px;width:160px;height:160px;border-radius:999px;background:radial-gradient(circle,rgba(255,255,255,.14),transparent 70%)"></div>
         <div style="position:relative;padding:var(--s5)">
           <div class="row" style="gap:8px;align-items:center">
@@ -1085,6 +1093,14 @@ function openGaode(s){
     : 'https://uri.amap.com/search?keyword=' + encodeURIComponent(name + ' ' + addr);
   try { if(window.open) window.open(url, '_blank'); } catch(e) {}
   toast('正在打开高德导航：' + name);
+}
+function toggleVideoSound(){
+  state.videoMuted = !state.videoMuted;
+  const v = document.getElementById('homeVideo');
+  if(v){ v.muted = state.videoMuted; try{ if(!state.videoMuted) v.play().catch(()=>{}); }catch(e){} }
+  const b = document.getElementById('videoSoundBtn');
+  if(b) b.innerHTML = ic(state.videoMuted?'mute':'sound',16);
+  toast(state.videoMuted ? '视频已静音' : '视频声音已开启');
 }
 function openAfterSaleBooking(){ go('m-asbook'); }
 /* ---------- 会员 · 售后申请-预约保养 ---------- */
@@ -2602,7 +2618,7 @@ function openOrderForm(i){
       <select class="input" id="ofSize">${['1.5m × 2.0m','1.8m × 2.0m','2.0m × 2.2m'].map(s=>`<option>${s}</option>`).join('')}</select>
     </div>
     <div class="field"><label class="req">门店</label>
-      <select class="input" id="ofStore">${['好得家精品馆','喜来乐店'].map(s=>`<option>${s}</option>`).join('')}</select>
+      <select class="input" id="ofStore">${['好得家精品馆','禧徕乐店'].map(s=>`<option>${s}</option>`).join('')}</select>
     </div>
     <div class="field"><label>收货地址（选填，创建订单后维护）</label><input class="input" id="ofAddr" placeholder="如：常熟市琴湖路 88 号 1-1101"></div>
     <div class="field"><label>备注（选填）</label><input class="input" id="ofNote" placeholder="如：客户偏好偏硬睡感"></div>
