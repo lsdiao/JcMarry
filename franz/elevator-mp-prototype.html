@@ -1,0 +1,2600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>弗朗茨别墅家用电梯 · 原型（iPhone 15 Pro · 亮色系 · 视频 Hero）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dseg@0.46.0/css/dseg.css">
+<style>
+  /* ============================================================
+     8pt SPACING GRID — every value is a multiple of 8 (4 = half-step)
+     --s1:4  --s2:8  --s3:16  --s4:24  --s5:32  --s6:40  --s7:48  --s8:56  --s9:64
+     ============================================================ */
+  :root{
+    --s1:4px; --s2:8px; --s3:16px; --s4:24px; --s5:32px; --s6:40px; --s7:48px; --s8:56px; --s9:64px;
+
+    /* LIGHT palette — cool off-white, no black background */
+    --bg:#E9ECEF;
+    --bg-2:#F3F5F7;
+
+    /* glass panels — white translucent over the light field */
+    --glass:rgba(255,255,255,0.62);
+    --glass-strong:rgba(255,255,255,0.88);
+    --border:rgba(18,22,28,0.09);
+    --border-strong:rgba(18,22,28,0.18);
+
+    /* foreground — dark ink on light */
+    --fg:#14171B; --fg-2:#4B5561; --fg-3:#78828D; --fg-4:#A6AEB7; --icon-neutral:#6B7580;
+
+    /* glow hues — cards only: 梅紫 / 钴蓝 / 余烬 */
+    --plum:124,58,214;
+    --cobalt:36,88,224;
+    --ember:200,68,26;
+
+    --radius-lg:16px; --radius-md:12px; --radius-sm:8px; --radius-pill:999px;
+    --ease:cubic-bezier(0.2,0,0,1);
+    --motion-fast:150ms; --motion-base:220ms;
+    --nav-h:94px; --tab-h:84px;
+
+    --font-sans:'Geist',-apple-system,BlinkMacSystemFont,"PingFang SC","HarmonyOS Sans SC","Noto Sans CJK SC",sans-serif;
+    --font-dot:'DSEG14 Classic','DSEG7 Classic',ui-monospace,"SFMono-Regular",monospace;
+
+    --shadow:0 1px 2px rgba(18,22,28,0.05), 0 10px 28px -14px rgba(18,22,28,0.20);
+    --inset-hi:inset 0 1px 0 rgba(255,255,255,0.90);
+  }
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; height:100%;}
+  body{
+    font-family:var(--font-sans);
+    background:var(--bg);            /* flat light field, no gradient */
+    color:var(--fg);
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; overflow:hidden;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+
+  /* ============ Device frame: iPhone 15 Pro (light titanium) ============ */
+  .stage{display:flex; align-items:center; justify-content:center; width:100%; height:100vh;}
+  .device{
+    position:relative; width:393px; height:852px; flex:0 0 auto;
+    border-radius:55px; padding:11px;
+    background:linear-gradient(150deg,#eef0f2,#b8bcc1 38%,#d9dce0 62%,#9fa3a8);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.85) inset,
+      0 0 0 2px #8b8f94,
+      0 40px 80px -20px rgba(0,0,0,0.30),
+      0 12px 30px -10px rgba(0,0,0,0.22);
+  }
+  .device::before{
+    content:""; position:absolute; inset:11px; border-radius:46px;
+    box-shadow:0 0 0 1.5px rgba(255,255,255,0.7) inset, 0 0 0 1px rgba(0,0,0,0.18);
+    pointer-events:none; z-index:60;
+  }
+  .screen{position:relative; width:100%; height:100%; border-radius:46px; overflow:hidden; background:var(--bg);}
+  .island{position:absolute; top:11px; left:50%; transform:translateX(-50%); width:122px; height:35px; background:#000; border-radius:20px; z-index:55;}
+
+  /* ============ App shell ============ */
+  .app{position:absolute; inset:0;}
+  .content{
+    position:absolute; inset:0; overflow-y:auto; overflow-x:hidden;
+    padding:var(--nav-h) var(--s3) calc(var(--tab-h) + env(safe-area-inset-bottom,0px)) var(--s3);
+    -webkit-overflow-scrolling:touch; scrollbar-width:none; background:transparent;
+  }
+  .content::-webkit-scrollbar{display:none;}
+
+  /* ============ Frosted bars (Apple glass · light) ============ */
+  .glass{
+    background:rgba(255,255,255,0.72);
+    -webkit-backdrop-filter:blur(24px) saturate(180%);
+    backdrop-filter:blur(24px) saturate(180%);
+    border-bottom:0.5px solid var(--border);
+    box-shadow:0 1px 0 rgba(255,255,255,0.7) inset;
+  }
+
+  /* Status bar */
+  .statusbar{
+    position:absolute; top:0; left:0; right:0; height:50px; z-index:40;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 var(--s5) 0 var(--s6); font-weight:500; font-size:15px; letter-spacing:0.2px; color:var(--fg);
+    pointer-events:none;
+  }
+  .statusbar .sb-right{display:flex; align-items:center; gap:var(--s1);}
+
+  /* Nav bar */
+  .navbar{position:absolute; top:0; left:0; right:0; height:var(--nav-h); z-index:30; padding-top:50px;}
+  .navbar-inner{height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 var(--s3);}
+  .nav-title{font-family:var(--font-sans); font-size:16px; font-weight:500; color:var(--fg); letter-spacing:0.6px;}
+  .nav-right{display:flex; align-items:center; gap:var(--s2);}
+  .role-pill{
+    display:inline-flex; align-items:center; gap:var(--s1); height:32px; padding:0 var(--s2);
+    background:var(--glass-strong); border:0.5px solid var(--border-strong);
+    border-radius:var(--radius-pill); font-size:13px; font-weight:500; color:var(--fg-2);
+    cursor:pointer; transition:transform var(--motion-fast) var(--ease), background var(--motion-fast) var(--ease);
+  }
+  .role-pill:active{transform:scale(0.95); background:var(--bg-2);}
+  .role-pill .dot{width:6px; height:6px; border-radius:50%; background:var(--fg-3);}
+
+  /* ============ Tab bar (unified · 4 tabs) ============ */
+  .tabbar{position:absolute; left:0; right:0; bottom:0; height:var(--tab-h); z-index:30;
+    padding-bottom:env(safe-area-inset-bottom,0px); border-top:0.5px solid var(--border);
+    background:rgba(255,255,255,0.76);
+    -webkit-backdrop-filter:blur(24px) saturate(180%); backdrop-filter:blur(24px) saturate(180%);}
+  .tab-row{position:relative; height:50px; display:flex;}
+  .tab{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--s1);
+    color:var(--fg-4); cursor:pointer; position:relative; transition:color var(--motion-base) var(--ease);}
+  .tab.active{color:var(--fg);}
+  .tab.has-msg{color:var(--fg);}
+  .tab svg{display:block;}
+  .tab-label{font-size:10.5px; line-height:1; letter-spacing:0.2px; font-weight:500;}
+  .tab-ic{position:relative; display:flex;}
+  /* static state — no looping pulse */
+  .tab-dot{position:absolute; top:-4px; right:-10px; min-width:16px; height:16px; padding:0 var(--s1);
+    border-radius:9px; background:rgb(var(--ember)); color:#fff; font-size:10px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 2px var(--bg), 0 0 10px 1px rgba(var(--ember),0.45);}
+  .tab-indicator{position:absolute; bottom:0; left:0; height:2px; width:25%; background:var(--fg);
+    border-radius:2px; transform:translateX(0); transition:transform var(--motion-base) var(--ease);}
+
+  /* ============ Section title ============ */
+  .section-title{display:flex; align-items:baseline; justify-content:space-between; font-family:var(--font-sans);
+    font-size:15px; font-weight:500; color:var(--fg); margin:var(--s4) var(--s1) var(--s3); letter-spacing:0.4px;}
+  .st-more{display:inline-flex; align-items:center; gap:var(--s1); font-size:12px; font-weight:400; color:var(--fg-2); cursor:pointer;}
+  .st-more svg{width:14px; height:14px;}
+  .st-count{font-size:12px; font-weight:400; color:var(--fg-4); letter-spacing:0.2px;}
+
+  /* ============ Shared panel — white glass ============ */
+  .card,.pcard,.surface{
+    background:var(--glass); border:0.5px solid var(--border); border-radius:var(--radius-lg);
+    box-shadow:var(--inset-hi), var(--shadow);
+  }
+  /* padded card variant (detail-page content cards) */
+  .card.pad{padding:var(--s3);}
+  /* consistent vertical rhythm between stacked blocks on a detail page */
+  .page > .card{margin-bottom:var(--s2);}
+  .page > .notice{margin-bottom:var(--s2);}
+  /* inner glow (replaces gradient) — only on cards, only in the 3 hues */
+  .glow{ box-shadow:var(--inset-hi), inset 0 0 72px -22px rgba(var(--glow),0.24), var(--shadow); }
+  .glow-soft{ box-shadow:var(--inset-hi), inset 0 0 96px -44px rgba(var(--glow),0.18), var(--shadow); }
+  .g-plum{--glow:var(--plum);} .g-cobalt{--glow:var(--cobalt);} .g-ember{--glow:var(--ember);}
+
+  /* ============ Video hero (top of homepage) ============ */
+  .video-hero{position:relative; width:100%; height:208px; border-radius:var(--radius-lg); overflow:hidden;
+    background:#C9CED3; margin-top:var(--s2); margin-bottom:var(--s3); box-shadow:var(--shadow);}
+  .vh-video{width:100%; height:100%; object-fit:cover; display:block; cursor:pointer;}
+  .vh-top{position:absolute; top:var(--s3); left:var(--s3); pointer-events:none;}
+  .vh-wordmark{display:inline-flex; align-items:center; gap:var(--s2); height:28px; padding:0 var(--s2);
+    border-radius:var(--radius-pill); background:rgba(12,14,18,0.44);
+    -webkit-backdrop-filter:blur(12px) saturate(150%); backdrop-filter:blur(12px) saturate(150%);
+    border:0.5px solid rgba(255,255,255,0.20); color:#fff;
+    font-family:var(--font-sans); font-size:11px; font-weight:500; letter-spacing:2.2px;}
+  .vh-controls{position:absolute; right:var(--s3); bottom:var(--s3); display:flex; align-items:center; gap:var(--s2);}
+  .vh-btn{height:34px; display:inline-flex; align-items:center; justify-content:center; gap:var(--s1);
+    padding:0 var(--s2); border-radius:var(--radius-pill); background:rgba(12,14,18,0.48);
+    -webkit-backdrop-filter:blur(14px) saturate(150%); backdrop-filter:blur(14px) saturate(150%);
+    border:0.5px solid rgba(255,255,255,0.22); color:#fff; font-family:var(--font-sans);
+    font-size:11px; font-weight:500; letter-spacing:0.3px; cursor:pointer;
+    transition:transform var(--motion-fast) var(--ease), background var(--motion-fast) var(--ease);}
+  .vh-btn:active{transform:scale(0.94); background:rgba(12,14,18,0.66);}
+  .vh-btn:focus-visible{outline:2px solid rgba(255,255,255,0.9); outline-offset:2px;}
+  .vh-btn.icononly{width:34px; padding:0;}
+  .vh-btn-ic{display:flex; transition:opacity var(--motion-fast) var(--ease);}
+  .vh-hint{position:absolute; left:var(--s3); bottom:var(--s4); color:rgba(255,255,255,0.82);
+    font-family:var(--font-sans); font-size:11px; font-weight:400; letter-spacing:0.4px; pointer-events:none;
+    text-shadow:0 1px 3px rgba(0,0,0,0.5);}
+
+  /* ============ Hero card ============ */
+  .hero{padding:var(--s3);}
+  .hero-eyebrow{font-size:11px; letter-spacing:3px; color:var(--fg-3); font-weight:500; text-transform:uppercase;}
+  .hero-title{font-family:var(--font-sans); font-size:30px; font-weight:500; letter-spacing:1px; margin:var(--s3) 0 0; color:var(--fg);}
+  .hero-info{font-family:var(--font-sans); font-size:13px; color:var(--fg-2); margin:var(--s2) 0 0; font-weight:300; letter-spacing:0.4px;}
+  .hero-actions{display:flex; gap:var(--s2); margin-top:var(--s4);}
+  /* 3-column grid + hairline dividers: prevents big numbers from colliding */
+  .hero-stats{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); column-gap:var(--s2);
+    margin-top:var(--s4); border-top:0.5px solid var(--border); padding-top:var(--s3);}
+  .hstat{min-width:0;}
+  .hstat + .hstat{border-left:0.5px solid var(--border); padding-left:var(--s2);}
+  .hstat-l{font-size:11px; color:var(--fg-3); margin-top:var(--s2); letter-spacing:0.4px;}
+
+  /* ============ Buttons ============ */
+  .btn{display:inline-flex; align-items:center; gap:var(--s2); height:48px; padding:0 var(--s4); border-radius:var(--radius-pill);
+    font-family:var(--font-sans); font-size:15px; font-weight:500; border:0.5px solid var(--border-strong);
+    background:var(--glass-strong); color:var(--fg);
+    cursor:pointer; transition:transform var(--motion-fast) var(--ease), background var(--motion-fast);}
+  .btn:active{transform:scale(0.97);}
+  .btn.cta{background:#14171B; color:#fff; border-color:transparent;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.18), 0 10px 24px -12px rgba(20,23,27,0.55);}
+  .btn.ghost{background:transparent; color:var(--fg); border-color:var(--border-strong);}
+  .btn-block{display:flex; width:100%; justify-content:center;}
+
+  /* ============ Dot-matrix core numbers (sized to fit the 3-col grid) ============ */
+  .dot-num{font-family:var(--font-dot); font-weight:400; font-size:28px; line-height:1.1; letter-spacing:0;
+    color:var(--fg); font-variant-numeric:tabular-nums; white-space:nowrap;}
+
+  /* ============ Data readout (Geist 36/300) ============ */
+  .data{font-family:var(--font-sans); font-size:36px; font-weight:300; letter-spacing:0.5px; color:var(--fg); line-height:1.05; font-variant-numeric:tabular-nums;}
+
+  /* ============ Featured product hscroll ============ */
+  .hscroll{display:flex; gap:var(--s2); overflow-x:auto; padding:var(--s1) var(--s1) var(--s3); scroll-snap-type:x mandatory; scrollbar-width:none;}
+  .hscroll::-webkit-scrollbar{display:none;}
+  .pcard{flex:0 0 200px; scroll-snap-align:start; position:relative; overflow:hidden; padding:var(--s3);}
+  .pc-ic{width:40px; height:40px; border-radius:12px; background:rgba(var(--glow,90,100,110),0.13); color:rgb(var(--glow,90,100,110));
+    display:flex; align-items:center; justify-content:center; position:relative; z-index:1;}
+  .pc-name{font-family:var(--font-sans); font-size:15px; font-weight:500; margin-top:var(--s3); color:var(--fg); position:relative; z-index:1;}
+  .pc-desc{font-size:12px; color:var(--fg-3); margin-top:var(--s2); line-height:1.5; min-height:40px; position:relative; z-index:1; font-weight:300;}
+  .pc-price{font-size:12px; color:var(--fg); font-weight:500; margin-top:var(--s2); font-variant-numeric:tabular-nums; position:relative; z-index:1; letter-spacing:0.3px;}
+
+  /* ============ Case mini ============ */
+  .case-mini{display:flex; align-items:center; gap:var(--s4); padding:var(--s3); margin-bottom:var(--s2);}
+  .cm-ic{width:44px; height:44px; border-radius:12px; flex:0 0 auto;
+    background:var(--glass-strong); color:var(--fg-2);
+    display:flex; align-items:center; justify-content:center; border:0.5px solid var(--border);}
+  .cm-t{font-family:var(--font-sans); font-size:15px; font-weight:500; color:var(--fg);}
+  .cm-s{font-size:12px; color:var(--fg-3); margin-top:var(--s1); font-weight:300;}
+  .cm-metric{margin-left:auto; text-align:right; flex:0 0 auto;}
+  .cm-metric .m-n{font-family:var(--font-sans); font-size:30px; font-weight:300; color:var(--fg); font-variant-numeric:tabular-nums; letter-spacing:0.5px;}
+  .cm-metric .m-l{font-size:10px; color:var(--fg-4); margin-top:var(--s1); letter-spacing:0.3px;}
+
+  /* ============ Single store card (compact · links to Amap) ============ */
+  .store-card{display:flex; align-items:center; gap:var(--s3); padding:var(--s3); text-decoration:none; color:inherit;
+    transition:transform var(--motion-fast) var(--ease), background var(--motion-fast) var(--ease);}
+  .store-card:active{transform:scale(0.985); background:var(--glass-strong);}
+  .sc-ic{width:40px; height:40px; border-radius:12px; flex:0 0 auto; background:var(--glass-strong); color:var(--fg-2);
+    display:flex; align-items:center; justify-content:center; border:0.5px solid var(--border);}
+  .sc-main{flex:1; min-width:0;}
+  .sc-name{font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--fg); line-height:1.35;}
+  .sc-addr{font-size:12px; color:var(--fg-3); margin-top:var(--s1); font-weight:300;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .sc-go{flex:0 0 auto; display:flex; align-items:center; gap:var(--s1); color:var(--fg-2); font-size:11px; font-weight:500;}
+
+  /* ============ Search ============ */
+  .search{display:flex; align-items:center; gap:var(--s2); background:var(--glass); border:0.5px solid var(--border);
+    border-radius:var(--radius-md); padding:var(--s2) var(--s3); color:var(--fg-3); font-size:13px; margin-bottom:var(--s3); font-weight:300;}
+
+  /* ============ Maintenance: mini stats / service rows / timeline ============ */
+  .mini-stats{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--s2); padding:var(--s3);}
+  .mini-stats > div{min-width:0;}
+  .ms-n{font-family:var(--font-sans); font-size:22px; font-weight:300; color:var(--fg); letter-spacing:0.3px; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .ms-l{font-size:10px; color:var(--fg-3); margin-top:var(--s1);}
+  .svc-row{display:flex; align-items:center; gap:var(--s3); padding:var(--s3); margin-bottom:var(--s2);}
+  .svc-ic{width:40px; height:40px; border-radius:12px; flex:0 0 auto; background:var(--glass-strong); color:var(--fg-2);
+    display:flex; align-items:center; justify-content:center; border:0.5px solid var(--border);}
+  .svc-main{flex:1; min-width:0;}
+  .svc-t{font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--fg);}
+  .svc-s{font-size:12px; color:var(--fg-3); margin-top:var(--s1); font-weight:300; line-height:1.4;}
+  .svc-r{margin-left:auto; flex:0 0 auto; font-size:11px; color:var(--fg-2); font-weight:500; font-variant-numeric:tabular-nums;}
+  .tl-row{display:flex; align-items:flex-start; gap:var(--s3); padding:var(--s3); margin-bottom:var(--s2);}
+  .tl-dot{width:8px; height:8px; border-radius:50%; background:rgb(var(--cobalt)); margin-top:6px; flex:0 0 auto;
+    box-shadow:0 0 0 4px rgba(var(--cobalt),0.14);}
+  .tl-dot.done{background:#1F7A55; box-shadow:0 0 0 4px rgba(38,140,100,0.14);}
+  .tl-main{flex:1; min-width:0;}
+  .tl-t{font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--fg);}
+  .tl-s{font-size:12px; color:var(--fg-3); margin-top:var(--s1); font-weight:300;}
+  .tl-time{margin-left:auto; flex:0 0 auto; font-size:11px; color:var(--fg-4); font-variant-numeric:tabular-nums;}
+
+  /* ============ Mine: profile ============ */
+  .profile{display:flex; align-items:center; gap:var(--s4); padding:var(--s4); margin-bottom:var(--s3);}
+  .avatar{width:56px; height:56px; border-radius:50%; flex:0 0 auto;
+    background:var(--glass-strong); border:0.5px solid var(--border-strong); color:var(--fg);
+    display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:500;}
+  .pc-name{font-family:var(--font-sans); font-size:18px; font-weight:500; color:var(--fg);}
+  .pc-sub{font-size:12px; color:var(--fg-3); margin-top:var(--s1); font-weight:300;}
+  .pc-info{font-size:12px; color:var(--fg-2); margin-top:var(--s2); font-weight:300; letter-spacing:0.3px;}
+  .pc-role{display:inline-flex; align-items:center; gap:var(--s1); margin-top:var(--s2); font-size:12px; font-weight:500;
+    color:var(--fg-2); background:var(--glass-strong); padding:var(--s1) var(--s2); border-radius:var(--radius-pill); border:0.5px solid var(--border);}
+
+  /* ============ Mine: message banner ============ */
+  .msg-banner{display:flex; align-items:center; gap:var(--s3); padding:var(--s3); border-radius:var(--radius-lg);
+    background:var(--glass); border:0.5px solid var(--border); margin-bottom:var(--s3); transition:all var(--motion-base) var(--ease);}
+  .msg-banner.has{background:rgba(var(--ember),0.09); border-color:rgba(var(--ember),0.34);
+    box-shadow:inset 0 0 60px -30px rgba(var(--ember),0.24), var(--shadow);}
+  .mb-ic{color:var(--fg-2); flex:0 0 auto;}
+  .msg-banner.has .mb-ic{color:rgb(var(--ember));}
+  .mb-t{font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--fg);}
+  .mb-s{font-size:12px; color:var(--fg-3); margin-top:var(--s1); font-weight:300;}
+  .mb-go{margin-left:auto; color:var(--fg-2); font-size:13px; font-weight:500; display:flex; align-items:center;}
+
+  /* ============ Mine: role-specific extra panel ============ */
+  .role-panel{padding:var(--s3);}
+  .rp-head{display:flex; align-items:center; justify-content:space-between; gap:var(--s2);}
+  .rp-tag{font-size:10px; font-weight:500; color:var(--fg-3); letter-spacing:1.2px; text-transform:uppercase;}
+  .rp-title{font-family:var(--font-sans); font-size:15px; font-weight:500; color:var(--fg); margin-top:var(--s3);}
+  .rp-main{display:flex; align-items:baseline; gap:var(--s1); margin-top:var(--s2);}
+  .rp-unit{font-size:13px; color:var(--fg-3); font-weight:400;}
+  .rp-biglabel{font-size:11px; color:var(--fg-3); margin-top:var(--s1);}
+  .rp-bar{height:4px; border-radius:2px; background:rgba(18,22,28,0.10); overflow:hidden; margin-top:var(--s3);}
+  .rp-bar > i{display:block; height:100%; border-radius:2px; background:rgb(var(--glow));}
+  .rp-barlabel{display:flex; justify-content:space-between; font-size:11px; color:var(--fg-3); margin-top:var(--s1);}
+  .rp-meta{display:flex; gap:var(--s3); margin-top:var(--s3); padding-top:var(--s3); border-top:0.5px solid var(--border);}
+  .rp-meta > div{flex:1; min-width:0;}
+  .rp-meta .k{font-size:10px; color:var(--fg-4);}
+  .rp-meta .v{font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--fg); margin-top:var(--s1); font-variant-numeric:tabular-nums; white-space:nowrap;}
+
+  /* ============ Mine: function grid ============ */
+  .fn-grid{background:var(--glass); border:0.5px solid var(--border); border-radius:var(--radius-lg); overflow:hidden;
+    display:grid; grid-template-columns:1fr 1fr;}
+  .fn-item{display:flex; align-items:center; gap:var(--s2); padding:var(--s3); cursor:pointer;
+    border-right:0.5px solid var(--border); border-bottom:0.5px solid var(--border);
+    transition:background var(--motion-fast) var(--ease);}
+  .fn-item:nth-child(2n){border-right:none;}
+  .fn-item:nth-last-child(-n+2){border-bottom:none;}
+  .fn-item:active{background:var(--glass-strong);}
+  .fn-ic{width:40px; height:40px; border-radius:12px; background:var(--glass-strong); color:var(--fg-2);
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+  .fn-body{flex:1; min-width:0;}
+  .fn-go{flex:0 0 auto; color:var(--fg-4); display:flex; align-items:center; transition:transform var(--motion-fast) var(--ease);}
+  .fn-item[data-page]:active .fn-go{transform:translateX(2px);}
+  .fn-t{font-family:var(--font-sans); font-size:14px; color:var(--fg); font-weight:500;}
+  .fn-note{font-size:10px; color:var(--fg-4); margin-top:var(--s1); letter-spacing:0.3px;}
+
+  /* ============ Mine: list rows ============ */
+  .list-card{overflow:hidden;}
+  .list-row{display:flex; align-items:center; gap:var(--s3); padding:var(--s3); text-decoration:none; color:inherit;
+    border-bottom:0.5px solid var(--border); cursor:pointer; transition:background var(--motion-fast) var(--ease);}
+  .list-row:last-child{border-bottom:none;}
+  .list-row:active{background:var(--glass-strong);}
+  .lr-ic{width:32px; height:32px; border-radius:10px; flex:0 0 auto; background:var(--glass-strong); color:var(--fg-2);
+    display:flex; align-items:center; justify-content:center;}
+  .lr-t{flex:1; font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--fg);}
+  .lr-val{font-size:12px; color:var(--fg-3); font-weight:400;}
+  .lr-arrow{color:var(--fg-4); display:flex;}
+  .tgl{width:40px; height:24px; border-radius:12px; background:rgba(18,22,28,0.16); position:relative; flex:0 0 auto;
+    transition:background var(--motion-base) var(--ease); cursor:pointer;}
+  .tgl.on{background:rgb(var(--cobalt));}
+  .tgl::after{content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,0.2); transition:transform var(--motion-base) var(--ease);}
+  .tgl.on::after{transform:translateX(16px);}
+  .version{text-align:center; font-size:11px; color:var(--fg-4); letter-spacing:1px; margin:var(--s4) 0 var(--s2);}
+
+  /* ============ Mine: switch entry ============ */
+  .switch-entry{display:flex; align-items:center; gap:var(--s3); padding:var(--s3); margin-top:var(--s3); cursor:pointer;}
+  .se-ic{width:40px; height:40px; border-radius:12px; background:var(--glass-strong); color:var(--fg-2);
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto;}
+  .se-t{font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--fg);} .se-go{margin-left:auto; color:var(--fg-4);}
+
+  /* ============ Status pills ============ */
+  .status-pill{font-size:11px; font-weight:500; padding:var(--s1) var(--s2); border-radius:var(--radius-pill); letter-spacing:0.3px; white-space:nowrap;}
+  .sp-ok{background:rgba(38,140,100,0.12); color:#1F7A55;} .sp-run{background:var(--glass-strong); color:var(--fg-2);}
+  .sp-stop{background:rgba(var(--ember),0.12); color:rgb(var(--ember));} .sp-warn{background:rgba(176,132,40,0.14); color:#8A6416;}
+
+  /* ============ Role switch bottom sheet ============ */
+  .sheet-backdrop{position:absolute; inset:0; background:rgba(20,24,30,0.32); backdrop-filter:blur(2px);
+    opacity:0; pointer-events:none; transition:opacity var(--motion-base) var(--ease); z-index:45;}
+  .sheet-backdrop.show{opacity:1; pointer-events:auto;}
+  .sheet{position:absolute; left:0; right:0; bottom:0; z-index:50;
+    background:rgba(247,249,251,0.94); -webkit-backdrop-filter:blur(30px) saturate(160%); backdrop-filter:blur(30px) saturate(160%);
+    border-top:0.5px solid var(--border); border-radius:22px 22px 0 0;
+    padding:var(--s2) var(--s3) calc(var(--s3) + env(safe-area-inset-bottom,0px));
+    transform:translateY(100%); transition:transform var(--motion-base) var(--ease);}
+  .sheet.show{transform:translateY(0);}
+  .sheet-grab{width:38px; height:4px; border-radius:2px; background:var(--border-strong); margin:var(--s2) auto var(--s3);}
+  .sheet-head{font-family:var(--font-sans); font-size:16px; font-weight:500; text-align:center; color:var(--fg); margin-bottom:var(--s3); letter-spacing:0.4px;}
+  .sheet-row{display:flex; align-items:center; gap:var(--s3); padding:var(--s3); border-radius:var(--radius-md); cursor:pointer; transition:background var(--motion-fast) var(--ease);}
+  .sheet-row:active{background:var(--glass-strong);}
+  .sheet-row.cur{background:var(--glass-strong);}
+  .sr-av{width:40px; height:40px; border-radius:12px; flex:0 0 auto;
+    background:var(--glass-strong); border:0.5px solid var(--border-strong); color:var(--fg);
+    display:flex; align-items:center; justify-content:center; font-weight:500; font-size:17px;}
+  .sr-name{font-family:var(--font-sans); font-size:15px; font-weight:500; color:var(--fg);}
+  .sr-org{font-size:12px; color:var(--fg-3); margin-top:var(--s1); font-weight:300;}
+  .sr-right{margin-left:auto; display:flex; align-items:center; gap:var(--s2);}
+  .sr-badge{font-size:11px; font-weight:500; color:rgb(var(--ember)); background:rgba(var(--ember),0.12); padding:var(--s1) var(--s2); border-radius:var(--radius-pill);}
+  .sheet-cancel{width:100%; height:48px; margin-top:var(--s3); border:0.5px solid var(--border); border-radius:var(--radius-md);
+    background:var(--glass-strong); color:var(--fg-2); font:inherit; font-family:var(--font-sans); font-size:15px; font-weight:500; cursor:pointer;}
+  .sheet-cancel:active{background:var(--bg-2);}
+
+  /* ============ Detail pages (role business modules) ============ */
+  .dp-head{display:flex; align-items:center; gap:var(--s3); margin:var(--s2) 0 var(--s3);}
+  .dp-back{width:32px; height:32px; flex:0 0 auto; border-radius:50%; background:var(--glass-strong);
+    border:0.5px solid var(--border); color:var(--fg-2); display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:transform var(--motion-fast) var(--ease), background var(--motion-fast) var(--ease);}
+  .dp-back:active{transform:scale(0.92); background:var(--bg-2);}
+  .dp-title{font-family:var(--font-sans); font-size:17px; font-weight:500; letter-spacing:0.5px; color:var(--fg);}
+  .dp-sub{font-size:11px; color:var(--fg-3); margin-top:var(--s1); font-weight:300; letter-spacing:0.3px;}
+
+  .seg-tabs{display:flex; gap:var(--s1); padding:var(--s1); background:var(--glass); border:0.5px solid var(--border);
+    border-radius:var(--radius-pill); margin-bottom:var(--s3);}
+  .seg-tab{flex:1; height:32px; display:flex; align-items:center; justify-content:center; border-radius:var(--radius-pill);
+    font-family:var(--font-sans); font-size:12px; font-weight:500; color:var(--fg-3); cursor:pointer;
+    transition:background var(--motion-base) var(--ease), color var(--motion-base) var(--ease);}
+  .seg-tab.on{background:var(--glass-strong); color:var(--fg); box-shadow:0 1px 2px rgba(18,22,28,0.08), var(--inset-hi);}
+
+  /* detail KPI — dot-matrix, 3 cols + hairline dividers */
+  .dp-kpi{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); column-gap:var(--s2); padding:var(--s3);}
+  .dp-kpi > div{min-width:0;}
+  .dp-kpi > div + div{border-left:0.5px solid var(--border); padding-left:var(--s2);}
+  .k-n{display:flex; align-items:baseline; gap:var(--s1); font-family:var(--font-dot); font-size:22px; line-height:1.1;
+    letter-spacing:0; color:var(--fg); font-variant-numeric:tabular-nums; white-space:nowrap;}
+  /* decimals: DSEG adds cell side-bearings around "." — use Geist instead */
+  .k-n.dec{font-family:var(--font-sans); font-weight:400; letter-spacing:0.2px;}
+  .k-n .u{font-family:var(--font-sans); font-size:11px; font-weight:400; color:var(--fg-3); letter-spacing:0.3px;}
+  .k-l{font-size:10px; color:var(--fg-3); margin-top:var(--s2); letter-spacing:0.3px;}
+
+  /* rank / generic row */
+  .rnk-row{display:flex; align-items:center; gap:var(--s3); padding:var(--s3); border-bottom:0.5px solid var(--border);}
+  .rnk-row:last-child{border-bottom:none;}
+  .rnk-n{width:28px; height:28px; flex:0 0 auto; border-radius:10px; background:var(--glass-strong); border:0.5px solid var(--border);
+    color:var(--fg-3); font-size:12px; font-weight:500; font-variant-numeric:tabular-nums; display:flex; align-items:center; justify-content:center;}
+  .rnk-n.top{background:rgba(var(--cobalt),0.14); color:rgb(var(--cobalt));}
+  .rnk-main{flex:1; min-width:0;}
+  .rnk-t{font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--fg);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .rnk-s{font-size:11px; color:var(--fg-3); margin-top:var(--s1); font-weight:300;}
+  .rnk-v{margin-left:auto; flex:0 0 auto; font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--fg);
+    font-variant-numeric:tabular-nums; white-space:nowrap;}
+
+  .lr-s{font-size:11px; color:var(--fg-3); margin-top:var(--s1); font-weight:300;}
+
+  /* task card (field / approval) */
+  .tk-time{width:40px; flex:0 0 auto; font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--fg);
+    font-variant-numeric:tabular-nums; letter-spacing:0.3px;}
+  .tk-main{flex:1; min-width:0;}
+  .tk-t{font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--fg);}
+  .tk-s{font-size:12px; color:var(--fg-3); margin-top:var(--s1); font-weight:300; line-height:1.4;}
+  .tk-tags{display:flex; align-items:center; gap:var(--s1); margin-top:var(--s2); flex-wrap:wrap;}
+  .chip{font-size:10px; font-weight:500; color:var(--fg-3); background:var(--glass-strong); border:0.5px solid var(--border);
+    padding:var(--s1) var(--s2); border-radius:var(--radius-pill); letter-spacing:0.3px; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .tk-btn{height:32px; flex:0 0 auto; padding:0 var(--s3); border-radius:var(--radius-pill); border:0.5px solid var(--border-strong);
+    background:var(--glass-strong); color:var(--fg); font-family:var(--font-sans); font-size:12px; font-weight:500; cursor:pointer;
+    transition:transform var(--motion-fast) var(--ease), background var(--motion-fast) var(--ease);}
+  .tk-btn:active{transform:scale(0.94); background:var(--bg-2);}
+  .tk-btn.solid{background:#14171B; color:#fff; border-color:transparent;}
+  .tk-btn.reject{color:rgb(var(--ember)); border-color:rgba(var(--ember),0.42); background:rgba(var(--ember),0.08);}
+  .tk-btn.wide{flex:1; height:40px; padding:0;}
+
+  /* two-action rows move buttons to a full-width footer so titles get the whole row */
+  .task-col{padding:var(--s3) var(--s3) 0; margin-bottom:var(--s2);}
+  .task-top{display:flex; align-items:flex-start; gap:var(--s3);}
+  .tk-foot{display:flex; gap:var(--s2); margin-top:var(--s3); padding:var(--s3) 0; border-top:0.5px solid var(--border);}
+  .tk-foot.end{justify-content:flex-end;}
+  /* salesperson picker lives inside a task card */
+  .tk-pick{margin-top:var(--s3); border-top:0.5px solid var(--border);}
+
+  /* promo QR */
+  .qr-wrap{display:flex; align-items:center; gap:var(--s3);}
+  .qr{width:88px; height:88px; flex:0 0 auto; border-radius:var(--radius-sm); border:0.5px solid var(--border);}
+  .amt{font-family:var(--font-sans); font-size:15px; font-weight:500; color:var(--fg); font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .amt.pos{color:#1F7A55;}
+
+  /* bar chart (admin) */
+  .bars{display:flex; align-items:flex-end; gap:var(--s2); height:96px; padding:var(--s3) var(--s3) 0;}
+  .bar{flex:1; border-radius:4px 4px 2px 2px; background:rgba(var(--cobalt),0.24);}
+  .bar.hi{background:rgba(var(--cobalt),0.56);}
+  .bar-labels{display:flex; gap:var(--s2); padding:var(--s2) var(--s3) var(--s3);}
+  .bar-labels > div{flex:1; text-align:center; font-size:10px; color:var(--fg-4); font-variant-numeric:tabular-nums;}
+
+  /* role panel becomes tappable -> detail page */
+  .role-panel{cursor:pointer;}
+  .rp-more{display:flex; align-items:center; gap:var(--s1); margin-top:var(--s3); padding-top:var(--s3);
+    border-top:0.5px solid var(--border); font-family:var(--font-sans); font-size:12px; font-weight:500; color:var(--fg-2);}
+  .rp-more .go{margin-left:auto; color:var(--fg-4); display:flex;}
+
+  /* form fields (edit member / write after-sales) */
+  .fld{padding:var(--s3); border-bottom:0.5px solid var(--border);}
+  .fld:last-child{border-bottom:none;}
+  .fld-l{font-size:11px; color:var(--fg-3); letter-spacing:0.3px; margin-bottom:var(--s1); font-weight:500;}
+  .fld input, .fld textarea{
+    width:100%; border:none; background:transparent; outline:none; padding:0;
+    font-family:var(--font-sans); font-size:15px; font-weight:400; color:var(--fg); letter-spacing:0.2px;}
+  .fld input::placeholder, .fld textarea::placeholder{color:var(--fg-4);}
+  .fld textarea{min-height:96px; resize:none; line-height:1.6;}
+
+  /* upload dropzone (certificates) */
+  .up{border:1px dashed rgba(18,22,28,0.28); border-radius:var(--radius-md); padding:var(--s4);
+    display:flex; flex-direction:column; align-items:center; gap:var(--s2); color:var(--fg-2); cursor:pointer;
+    background:var(--glass-strong); transition:transform var(--motion-fast) var(--ease);}
+  .up:active{transform:scale(0.99);}
+  .up-t{font-family:var(--font-sans); font-size:14px; font-weight:500; color:var(--fg);}
+  .up-s{font-size:11px; color:var(--fg-4); font-weight:300; letter-spacing:0.3px;}
+  .up-files{width:100%;}
+  .up-file{display:flex; align-items:center; gap:var(--s2); margin-top:var(--s3); padding:var(--s2) var(--s3);
+    border-radius:var(--radius-sm); background:rgba(var(--cobalt),0.10); border:0.5px solid rgba(var(--cobalt),0.28);
+    font-size:12px; font-weight:400; color:var(--fg);}
+
+  .plan-price{font-family:var(--font-dot); font-size:22px; line-height:1.1; color:var(--fg);
+    font-variant-numeric:tabular-nums; margin-top:var(--s2); white-space:nowrap;}
+  .plan-price .u{font-family:var(--font-sans); font-size:11px; font-weight:300; color:var(--fg-3); margin-left:var(--s1);}
+  /* plan cards carry less content — trim the doubled footer padding from .tk-foot */
+  .card.plan .tk-foot{margin-top:var(--s2); padding-top:var(--s2); padding-bottom:var(--s3);}
+  /* selectable chips */
+  .chips{display:flex; gap:var(--s2); flex-wrap:wrap;}
+  .chip.on{background:rgb(var(--cobalt)); color:#fff; border-color:transparent; cursor:pointer;}
+
+  /* ============ Dispatch calendar ============ */
+  .cal-head{display:flex; align-items:center; justify-content:space-between; gap:var(--s2);}
+  .cal-month{font-family:var(--font-sans); font-size:15px; font-weight:500; color:var(--fg); letter-spacing:0.4px;}
+  .cal-month small{font-size:11px; font-weight:400; color:var(--fg-3); margin-left:var(--s2); letter-spacing:0.3px;}
+  .cal-nav{display:flex; gap:var(--s1);}
+  .cal-btn{width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:var(--glass-strong); border:0.5px solid var(--border); color:var(--fg-2); cursor:pointer;
+    transition:transform var(--motion-fast) var(--ease), background var(--motion-fast) var(--ease);}
+  .cal-btn:active{transform:scale(0.9); background:var(--bg-2);}
+  .cal-wd{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); margin-top:var(--s3);}
+  .cal-wd span{font-size:10px; color:var(--fg-4); text-align:center; letter-spacing:0.5px;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); margin-top:var(--s1);}
+  .cal-cell{height:40px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    border-radius:10px; cursor:pointer;
+    transition:background var(--motion-fast) var(--ease), transform var(--motion-fast) var(--ease);}
+  .cal-blank{cursor:default;}
+  .cal-d{width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:50%;
+    font-family:var(--font-sans); font-size:12.5px; font-weight:400; color:var(--fg-2);
+    font-variant-numeric:tabular-nums;
+    transition:background var(--motion-fast) var(--ease), color var(--motion-fast) var(--ease);}
+  .cal-cell.today .cal-d{box-shadow:inset 0 0 0 1px var(--border-strong); color:var(--fg);}
+  .cal-cell.on{background:rgba(18,22,28,0.05);}
+  .cal-cell.on .cal-d{background:var(--fg); color:#fff; font-weight:500;}
+  .cal-cell:active{transform:scale(0.94);}
+  .cal-dots{display:flex; gap:3px; height:4px;}
+  .cal-dots i{width:4px; height:4px; border-radius:2px; display:block;}
+  .dt-warn{background:#B08428;} .dt-run{background:rgb(var(--cobalt));}
+  .dt-ok{background:#1F7A55;} .dt-stop{background:rgba(18,22,28,0.20);}
+  .cal-legend{display:flex; flex-wrap:wrap; gap:var(--s3); margin-top:var(--s3); padding-top:var(--s3);
+    border-top:0.5px solid var(--border);}
+  .cal-legend span{display:inline-flex; align-items:center; gap:var(--s1); font-size:10px; color:var(--fg-3); letter-spacing:0.3px;}
+  .cal-legend i{width:4px; height:4px; border-radius:2px; display:block;}
+  .day-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:var(--s1);}
+  .day-t{font-family:var(--font-sans); font-size:13px; font-weight:500; color:var(--fg); letter-spacing:0.3px;}
+  .day-n{font-size:10px; color:var(--fg-4); letter-spacing:0.3px;}
+
+  /* tappable person name */
+  .who{display:inline-flex; align-items:center; gap:var(--s1); padding:var(--s1) var(--s2);
+    border-radius:var(--radius-pill); background:var(--glass-strong); border:0.5px solid var(--border);
+    font-family:var(--font-sans); font-size:11px; font-weight:500; color:var(--fg); cursor:pointer;
+    transition:transform var(--motion-fast) var(--ease), background var(--motion-fast) var(--ease);}
+  .who:active{transform:scale(0.94); background:var(--bg-2);}
+
+  /* technician profile card */
+  .tech-top{display:flex; align-items:center; gap:var(--s3);}
+  .tech-av{width:56px; height:56px; flex:0 0 auto; border-radius:50%; background:var(--glass-strong);
+    border:0.5px solid var(--border-strong); color:var(--fg); display:flex;
+    align-items:center; justify-content:center; font-family:var(--font-sans); font-size:22px; font-weight:500;}
+  .tech-main{flex:1; min-width:0;}
+  .tech-n{display:flex; align-items:center; gap:var(--s2);
+    font-family:var(--font-sans); font-size:17px; font-weight:500; color:var(--fg); margin-bottom:0;}
+  .tech-o{font-size:11px; color:var(--fg-3); margin-top:var(--s1); font-weight:300; letter-spacing:0.3px;}
+  .tech-stats{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:var(--s2);
+    margin-top:var(--s3); padding-top:var(--s3); border-top:0.5px solid var(--border);}
+  .tech-stats > div{min-width:0;}
+  .ts-n{font-family:var(--font-dot); font-size:20px; line-height:1.1; color:var(--fg); font-variant-numeric:tabular-nums;}
+  /* decimals must NOT use the dot-matrix font (full-width dot cell reads as "18 . 6") */
+  .ts-n.dec{font-family:var(--font-sans); font-weight:300; font-size:21px; letter-spacing:0.5px;}
+  .ts-l{font-size:10px; color:var(--fg-3); margin-top:var(--s2); letter-spacing:0.3px;}
+
+  /* notice strip */
+  .notice{display:flex; gap:var(--s2); padding:var(--s3); border-radius:var(--radius-md);
+    background:var(--glass-strong); border:0.5px solid var(--border);
+    font-size:11px; color:var(--fg-3); line-height:1.6; font-weight:300; margin-bottom:var(--s3);}
+
+  /* invite-to-membership CTA on 「我的」 */
+  .invite-card{display:flex; align-items:center; gap:var(--s3); padding:var(--s3); cursor:pointer;}
+  .invite-ic{width:44px; height:44px; flex:0 0 auto; border-radius:14px; display:flex; align-items:center; justify-content:center;
+    background:rgba(var(--plum),0.14); color:rgb(var(--plum));}
+  .invite-body{flex:1; min-width:0;}
+  .invite-t{font-family:var(--font-sans); font-size:15px; font-weight:500; color:var(--fg);}
+  .invite-s{font-size:11px; color:var(--fg-3); margin-top:var(--s1); font-weight:300; letter-spacing:0.3px; line-height:1.5;}
+
+  /* membership attribution card */
+  .own-card{padding:var(--s3);}
+  .own-top{display:flex; align-items:center; gap:var(--s2); flex-wrap:wrap;}
+  .own-lbl{font-size:11px; color:var(--fg-4); font-weight:300; letter-spacing:0.3px;}
+  .own-name{font-family:var(--font-sans); font-size:16px; font-weight:500; color:var(--fg);}
+  .own-note{font-size:11px; color:var(--fg-3); margin-top:var(--s2); font-weight:300; line-height:1.6;}
+
+  /* salesperson picker (admin assigns members) */
+  .pick-row{display:flex; align-items:center; gap:var(--s2); padding:var(--s2) var(--s3); cursor:pointer;
+    border-top:0.5px solid var(--border); transition:background var(--motion-fast) var(--ease);}
+  .pick-row:active{background:var(--glass-strong);}
+  .pick-dot{width:16px; height:16px; flex:0 0 auto; border-radius:50%; border:0.5px solid var(--border-strong);}
+  .pick-row.on .pick-dot{background:rgb(var(--cobalt)); border-color:transparent;}
+  .pick-t{font-family:var(--font-sans); font-size:13px; font-weight:500; color:var(--fg); flex:1; min-width:0;}
+  .pick-n{font-size:10px; color:var(--fg-4); font-weight:300;}
+
+  /* toast (assignment / copy feedback) */
+  .toast{position:absolute; left:50%; bottom:96px; transform:translate(-50%,8px);
+    padding:var(--s2) var(--s4); border-radius:var(--radius-pill); background:rgba(20,23,27,0.92); color:#fff;
+    font-family:var(--font-sans); font-size:12px; font-weight:400; letter-spacing:0.3px; white-space:nowrap;
+    opacity:0; transition:opacity var(--motion-base) var(--ease), transform var(--motion-base) var(--ease);
+    pointer-events:none; z-index:60;}
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+
+  /* ============ Motion: materialize (blur->clear) ============ */
+  .stagger{opacity:0; transform:translateY(10px); filter:blur(6px);
+    transition:opacity .5s var(--ease), transform .5s var(--ease), filter .5s var(--ease);}
+  .stagger.show{opacity:1; transform:none; filter:none;}
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{
+      animation-duration:0.01ms !important; animation-iteration-count:1 !important;
+      transition-duration:0.01ms !important; scroll-behavior:auto !important;
+    }
+    .stagger{opacity:1; transform:none; filter:none;}
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="device" id="device">
+      <div class="island"></div>
+      <div class="screen">
+        <div class="app">
+          <div class="statusbar">
+            <span class="sb-time">9:41</span>
+            <span class="sb-right" id="sb-right"></span>
+          </div>
+          <div class="navbar glass">
+            <div class="navbar-inner">
+              <div class="nav-title" id="nav-title">弗朗茨</div>
+              <div class="nav-right">
+                <div class="role-pill" id="role-pill"></div>
+              </div>
+            </div>
+          </div>
+          <div class="content" id="content"></div>
+          <div class="tabbar">
+            <div class="tab-row" id="tab-row"><div class="tab-indicator" id="tab-indicator"></div></div>
+          </div>
+          <div class="sheet-backdrop" id="backdrop"></div>
+          <div class="sheet" id="sheet">
+            <div class="sheet-grab"></div>
+            <div class="sheet-head">切换身份</div>
+            <div class="sheet-list" id="sheet-list"></div>
+            <button class="sheet-cancel" id="sheet-cancel">取消</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ===================== Icons (linear SVG, no emoji) ===================== */
+const ICONS = {
+  home:'<path d="M3 11.4 12 4l9 7.4"/><path d="M5.2 9.8V20h13.6V9.8"/>',
+  elevator:'<rect x="6.5" y="3" width="11" height="18" rx="1.4"/><line x1="6.5" y1="12" x2="17.5" y2="12"/><path d="M10 9.2l1.4-1.4L12.8 9.2"/><path d="M14 14.8l-1.4 1.4L11.2 14.8"/>',
+  box:'<path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/>',
+  trophy:'<path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3M9.5 14h5M10 14v3h4v-3M8 20h8"/>',
+  location:'<path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  user:'<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/>',
+  userGroup:'<circle cx="9" cy="8" r="3"/><path d="M3.2 19c0-3.2 2.6-5.8 5.8-5.8S14.8 15.8 14.8 19"/><path d="M16 6.4a2.8 2.8 0 0 1 0 5.2"/><path d="M16.6 13.4c2.3.4 4 2.4 4 4.9"/>',
+  dashboard:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/>',
+  share:'<circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="18" cy="18" r="2.4"/><line x1="8.2" y1="11" x2="15.8" y2="7"/><line x1="8.2" y1="13" x2="15.8" y2="17"/>',
+  assignment:'<rect x="5" y="4" width="14" height="16" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>',
+  fileCopy:'<rect x="5" y="4" width="11" height="14" rx="1.6"/><path d="M9 20h8a2 2 0 0 0 2-2V8"/><line x1="8" y1="9" x2="13" y2="9"/><line x1="8" y1="13" x2="13" y2="13"/>',
+  chart:'<line x1="4" y1="20" x2="20" y2="20"/><rect x="6" y="11" width="3" height="7" rx="0.6"/><rect x="11" y="7" width="3" height="11" rx="0.6"/><rect x="16" y="13" width="3" height="5" rx="0.6"/>',
+  bell:'<path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10.4 20a2 2 0 0 0 3.2 0"/>',
+  calendar:'<rect x="4" y="5" width="16" height="15" rx="2"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="8" y1="3" x2="8" y2="6"/><line x1="16" y1="3" x2="16" y2="6"/>',
+  checkCircle:'<circle cx="12" cy="12" r="8.5"/><path d="M8.4 12.4l2.3 2.3 4.8-5"/>',
+  clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.2v5l3.2 1.8"/>',
+  badge:'<path d="M12 3l2.4 2 3-.3 1 2.9 2.6 1.5-1 2.9 1 2.9-2.6 1.5-1 2.9-3-.3L12 21l-2.4-2-3 .3-1-2.9L3 15l1-2.9-1-2.9 2.6-1.5 1-2.9 3 .3z"/><path d="M9 12l2 2 4-4"/>',
+  search:'<circle cx="11" cy="11" r="6"/><line x1="15.5" y1="15.5" x2="20" y2="20"/>',
+  phone:'<path d="M6.5 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5v3a2 2 0 0 1-2 2C12 21 3 12 4.5 6A2 2 0 0 1 6.5 4z"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8"/>',
+  tools:'<path d="M14.2 6.3a3.4 3.4 0 0 0-4.3 4.2L4 16.4 7.6 20l5.9-5.9a3.4 3.4 0 0 0 4.1-4.2l-2.2 2.2-2-2 2.2-2.2z"/>',
+  scan:'<path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M4 16v2.5A1.5 1.5 0 0 0 5.5 20H8M16 20h2.5A1.5 1.5 0 0 0 20 18.5V16"/><path d="M4 12h3M17 12h3M12 4v3M12 17v3"/>',
+  wifi:'<path d="M3 9a13 13 0 0 1 18 0"/><path d="M6 12.5a8.5 8.5 0 0 1 12 0"/><path d="M9 16a4 4 0 0 1 6 0"/><circle cx="12" cy="19" r="0.8" fill="currentColor" stroke="none"/>',
+  shield:'<path d="M12 3l7 3v5c0 4.4-3 8.2-7 10-4-1.8-7-5.6-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  receipt:'<path d="M6 3h12v18l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/>',
+  money:'<circle cx="12" cy="12" r="8.5"/><path d="M8.5 9l3.5 4 3.5-4M12 13v4M9.5 14.5h5M9.5 12h5" stroke-width="1.3"/>',
+  certificate:'<rect x="4.5" y="4" width="15" height="11" rx="2"/><path d="M8 9.5h8M8 12.5h5"/><circle cx="12" cy="16.5" r="2"/><path d="M10.5 18.5l-1 3M13.5 18.5l1 3"/>',
+  chevron:'<path d="M6 9l6 6 6-6"/>',
+  arrowR:'<path d="M5 12h13M13 6l6 6-6 6"/>',
+  /* extra icons for the refined 我的 page + Amap link */
+  headset:'<path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="3" y="12.5" width="4" height="7" rx="1.6"/><rect x="17" y="12.5" width="4" height="7" rx="1.6"/><path d="M19 19.5c0 1.6-1.6 2-3 2"/>',
+  helpCircle:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.2a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.4"/><circle cx="12" cy="17" r="0.8" fill="currentColor" stroke="none"/>',
+  info:'<circle cx="12" cy="12" r="8.5"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="0.8" fill="currentColor" stroke="none"/>',
+  globe:'<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17"/><path d="M12 3.5c2.4 2.4 3.6 5.4 3.6 8.5S14.4 17.6 12 20.5C9.6 17.6 8.4 14.6 8.4 12S9.6 5.9 12 3.5z"/>',
+  logout:'<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/>',
+  navigation:'<path d="M21 3 3 10.6l7.6 2.8L13.4 21z"/>',
+  up:'<path d="M12 16V5"/><path d="M8 9l4-4 4 4"/><path d="M5 15v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3"/>',
+  pen:'<path d="M16.5 4.5l3 3L9 18H6v-3z"/><line x1="15" y1="6" x2="18" y2="9"/>',
+  keyIcon:'<circle cx="8.5" cy="12" r="4"/><path d="M12.5 12h6M16.5 12v3M19 12v2"/>',
+  /* membership invite / attribution — linear, no emoji */
+  gift:'<rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v7.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V12M12 8v12.5M12 8S10.5 8 9.5 6.9A2 2 0 0 1 12 4a2 2 0 0 0 2.5 2.9C13.5 8 12 8 12 8z"/>',
+  link:'<path d="M10 13.5a4.2 4.2 0 0 0 6.4.5l2-2a4.2 4.2 0 0 0-6-6l-1.2 1.2"/><path d="M14 10.5a4.2 4.2 0 0 0-6.4-.5l-2 2a4.2 4.2 0 0 0 6 6l1.2-1.2"/>',
+  swap:'<path d="M4 8h13M14 5l3 3-3 3"/><path d="M20 16H7M10 13l-3 3 3 3"/>',
+  /* detail-page icons — linear, no emoji */
+  arrowL:'<path d="M14.5 5.5 8 12l6.5 6.5"/>',
+  copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5.5 15H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v.5"/>',
+  /* video controls — linear, no emoji */
+  volumeX:'<path d="M11 5 6.8 8.8H3v6.4h3.8L11 19z"/><line x1="15.5" y1="9.5" x2="20.5" y2="14.5"/><line x1="20.5" y1="9.5" x2="15.5" y2="14.5"/>',
+  volume2:'<path d="M11 5 6.8 8.8H3v6.4h3.8L11 19z"/><path d="M15 9.2a4 4 0 0 1 0 5.6"/><path d="M17.6 6.8a7.5 7.5 0 0 1 0 10.4"/>',
+  pause:'<line x1="9" y1="5" x2="9" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/>',
+  play:'<path d="M8 5.5 18.5 12 8 18.5z"/>',
+  signal:'<rect x="2" y="13" width="3" height="6" rx="1"/><rect x="7" y="9" width="3" height="10" rx="1"/><rect x="12" y="5" width="3" height="14" rx="1"/><rect x="17" y="2" width="3" height="17" rx="1"/>',
+  battery:'<rect x="2" y="8" width="18" height="9" rx="2.4"/><rect x="4" y="10" width="12" height="5" rx="1" fill="currentColor" stroke="none"/><path d="M21 11v3" stroke-width="2"/>'
+};
+function icon(name,size=24,opt={}){
+  const rot = opt.rot||0;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${opt.sw||1.5}" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(${rot}deg);display:block">${ICONS[name]||''}</svg>`;
+}
+
+/* ===================== Status bar icons ===================== */
+document.getElementById('sb-right').innerHTML = icon('signal',16,{sw:1.4}) + icon('wifi',16,{sw:1.4}) + icon('battery',22,{sw:1.4});
+
+/* ===================== Role model (功能区别在「我的」) ===================== */
+const ROLES = {
+  member:{ name:'业主', user:'陈晓', org:'上海佘山别墅 · 业主', info:'电梯运行 1,284h · 下次保养 12/15',
+    messages:2, mine:[
+      {ic:'elevator',t:'我的电梯',page:'d-member'},{ic:'calendar',t:'维保预约',page:'d-booking'},
+      {ic:'tools',t:'报修进度',page:'d-repair'},{ic:'receipt',t:'延保续费',page:'d-warranty'} ]},
+  sales:{ name:'业务员', user:'李航', org:'华东大区 · 业务员', info:'本月业绩 ¥48.6万 · 目标完成 72%',
+    messages:0, mine:[
+      {ic:'userGroup',t:'我的客户',page:'d-clients'},{ic:'dashboard',t:'业绩中心',page:'d-sales'},
+      {ic:'share',t:'推广码',page:'d-promo'},{ic:'money',t:'佣金明细',page:'d-commission'} ]},
+  worker:{ name:'安装维保', user:'张建国', org:'上海安装队 · 技师', info:'今日 3 项安装 · 2 项待验收',
+    messages:5, mine:[
+      {ic:'assignment',t:'安装任务',page:'d-worker'},{ic:'fileCopy',t:'作业记录',page:'d-records'},
+      {ic:'box',t:'备件申领',page:'d-parts'},{ic:'certificate',t:'资质证书',page:'d-cert'} ]},
+  admin:{ name:'管理员', user:'王敏', org:'品牌总部 · 运营', info:'今日 6 项待办 · 4 家门店在营',
+    messages:1, mine:[
+      {ic:'calendar',t:'安排维保工单',page:'d-dispatch'},{ic:'assignment',t:'工单记录',page:'d-orders'},
+      {ic:'location',t:'门店查询',note:'仅查询',page:'d-stores'},{ic:'checkCircle',t:'待办审核',page:'d-approve'},
+      {ic:'chart',t:'数据看板',page:'d-board'},{ic:'keyIcon',t:'人员权限',page:'d-staff'} ]}
+};
+const ROLE_ORDER = ['member','sales','worker','admin'];
+
+/* Role-specific extra panel — only rendered inside 「我的」 */
+const ROLE_PANEL = {
+  member:{hue:'g-cobalt', page:'d-member', more:'设备详情', tag:'MY ELEVATOR · 我的电梯', title:'FR-T 曳引平台梯', status:'运行正常', statusCls:'sp-ok',
+    big:'1,284', unit:'h', bigLabel:'累计安全运行', bar:72, barLabel:'距下次保养进度',
+    meta:[['下次保养','12/15'],['维保次数','24'],['质保至','2031.06']]},
+  sales:{hue:'g-plum', page:'d-sales', more:'业绩中心', tag:'SALES · 业绩概览', title:'本月签约业绩', status:'达成 72%', statusCls:'sp-run',
+    big:'48.6', unit:'万', bigLabel:'本月销售额', bar:72, barLabel:'目标完成度',
+    meta:[['新增客户','8'],['待跟进','3'],['本月佣金','¥2.4万']]},
+  worker:{hue:'g-ember', page:'d-worker', more:'今日工单', tag:'FIELD · 今日工单', title:'安装与维保任务', status:'2 项待验收', statusCls:'sp-warn',
+    big:'3', unit:'项', bigLabel:'今日待完成', bar:60, barLabel:'今日完成度',
+    meta:[['已到场','2'],['待验收','2'],['本月工单','46']]},
+  admin:{hue:'g-cobalt', page:'d-admin', more:'运营总览', tag:'OPS · 运营概览', title:'品牌运营总览', status:'6 项待办', statusCls:'sp-run',
+    big:'128', unit:'单', bigLabel:'本月工单', bar:84, barLabel:'工单闭环率',
+    meta:[['在营门店','4'],['抽查队列','3'],['服务网点','36']]}
+};
+
+/* Unified tab bar — same for every role (4 tabs) */
+const TABS = [
+  {id:'home',label:'首页',icon:'home'},
+  {id:'products',label:'产品',icon:'box'},
+  {id:'maintenance',label:'维保',icon:'tools'},
+  {id:'mine',label:'我的',icon:'user'}
+];
+const TAB_TITLE = { home:'弗朗茨', products:'电梯系列', maintenance:'维保服务', mine:'我的' };
+
+/* Single store — links out to Amap */
+const STORE_NAME = '弗朗茨别墅家用电梯体验空间(常熟旗舰店)';
+const STORE_ADDR = '江苏省苏州市常熟市珠海路16~23中南锦城12幢101店铺';
+const AMAP_URL = 'https://uri.amap.com/search?keyword=' + encodeURIComponent(STORE_NAME + ' ' + STORE_ADDR)
+  + '&city=' + encodeURIComponent('常熟') + '&src=franz-prototype&callnative=1';
+
+let currentRole = 'member';
+let currentTab = 'home';
+let currentPage = null;   /* null = tab root; otherwise a role business-module detail page */
+const matchReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ===================== Video hero markup ===================== */
+function videoHero(){
+  return `<section class="video-hero stagger" aria-label="弗朗茨品牌影片">
+    <video id="heroVideo" class="vh-video" src="./franz-hero.mp4" poster="./franz-poster.jpg"
+           autoplay muted loop playsinline preload="auto" aria-label="品牌影片，默认静音循环播放"></video>
+    <div class="vh-top"><span class="vh-wordmark">FRANZ · SINCE 1876</span></div>
+    <div class="vh-hint" id="vhHint">品牌影片 · 静音循环播放</div>
+    <div class="vh-controls">
+      <button type="button" class="vh-btn" id="soundBtn" aria-label="开启声音（当前静音）" aria-pressed="false">
+        <span class="vh-btn-ic" id="soundIc">${icon('volumeX',16,{sw:1.6})}</span>
+        <span class="vh-btn-t" id="soundTxt">开启声音</span>
+      </button>
+      <button type="button" class="vh-btn icononly" id="playBtn" aria-label="暂停">
+        <span class="vh-btn-ic" id="playIc">${icon('pause',16,{sw:2})}</span>
+      </button>
+    </div>
+  </section>`;
+}
+
+/* ===================== Renderers ===================== */
+function homeShowcase(){
+  return `<div class="page">
+    ${videoHero()}
+    <section class="hero card glow-soft g-cobalt stagger">
+      <div class="hero-eyebrow">FRANZ · SINCE 1876</div>
+      <h1 class="hero-title">别墅家用电梯</h1>
+      <p class="hero-info">莱茵 TÜV 认证 · 10 年整机质保 · 德国匠心</p>
+      <div class="hero-actions">
+        <button class="btn cta">${icon('calendar',18)} 预约体验</button>
+        <button class="btn ghost">查看案例 ${icon('arrowR',16)}</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><div class="dot-num" data-to="12800" data-fmt="plain">0</div><div class="hstat-l">装机家庭</div></div>
+        <div class="hstat"><div class="dot-num" data-to="36" data-fmt="plain">0</div><div class="hstat-l">服务网点</div></div>
+        <div class="hstat"><div class="dot-num" data-to="1876" data-fmt="plain">0</div><div class="hstat-l">匠心起源</div></div>
+      </div>
+    </section>
+
+    <div class="section-title stagger">电梯系列 <span class="st-more" data-go="products">全部 ${icon('chevron',14,{rot:90})}</span></div>
+    <div class="hscroll stagger">
+      <div class="pcard card glow g-cobalt"><div class="pc-ic">${icon('elevator',20)}</div><div class="pc-name">曳引平台梯 FR-T</div><div class="pc-desc">静音曳引，适配复式与 LOFT，运行 &lt;42dB。</div><div class="pc-price">吊装 6h 起</div></div>
+      <div class="pcard card glow g-plum"><div class="pc-ic">${icon('tools',20)}</div><div class="pc-name">螺杆家梯 FR-S</div><div class="pc-desc">无机房无底坑，别墅首选，省空间。</div><div class="pc-price">井道 1.2㎡</div></div>
+      <div class="pcard card glow g-ember"><div class="pc-ic">${icon('shield',20)}</div><div class="pc-name">液压别墅梯 FR-H</div><div class="pc-desc">平稳大载重，低层住宅优选方案。</div><div class="pc-price">载重 400kg</div></div>
+      <div class="pcard card glow g-cobalt"><div class="pc-ic">${icon('box',20)}</div><div class="pc-name">观光玻璃梯 FR-P</div><div class="pc-desc">270° 全景井道，光影与景观共生。</div><div class="pc-price">定制型材</div></div>
+    </div>
+
+    <div class="section-title stagger">标杆案例 <span class="st-count">2 例</span></div>
+    <div class="card case-mini stagger">
+      <div class="cm-ic">${icon('shield',22)}</div>
+      <div style="flex:1"><div class="cm-t">上海·佘山别墅</div><div class="cm-s">螺杆家梯 FR-S · 无机房 · 井道 1.2㎡</div></div>
+      <div class="cm-metric"><div class="m-n">0</div><div class="m-l">24 月故障</div></div>
+    </div>
+    <div class="card case-mini stagger">
+      <div class="cm-ic">${icon('box',22)}</div>
+      <div style="flex:1"><div class="cm-t">杭州·西溪合院</div><div class="cm-s">观光玻璃梯 FR-P · 270° 景观井道</div></div>
+      <div class="cm-metric"><div class="m-n">38dB</div><div class="m-l">运行静音</div></div>
+    </div>
+
+    <div class="section-title stagger">门店 <span class="st-count">1 家</span></div>
+    <a class="card store-card stagger" href="${AMAP_URL}" target="_blank" rel="noopener"
+       title="${STORE_NAME}｜${STORE_ADDR}｜点击在高德地图中查看">
+      <div class="sc-ic">${icon('location',20)}</div>
+      <div class="sc-main">
+        <div class="sc-name">${STORE_NAME}</div>
+        <div class="sc-addr" title="${STORE_ADDR}">${STORE_ADDR}</div>
+      </div>
+      <div class="sc-go">高德 ${icon('navigation',14)}</div>
+    </a>
+  </div>`;
+}
+
+function tabProducts(){
+  const p = [
+    {ic:'elevator',hue:'g-cobalt',n:'曳引平台梯 FR-T',d:'静音曳引，适配复式与 LOFT，运行 <42dB。',p:'吊装 6h 起'},
+    {ic:'tools',hue:'g-plum',n:'螺杆家梯 FR-S',d:'无机房无底坑，别墅首选，省空间。',p:'井道 1.2㎡'},
+    {ic:'shield',hue:'g-ember',n:'液压别墅梯 FR-H',d:'平稳大载重，低层住宅优选方案。',p:'载重 400kg'},
+    {ic:'box',hue:'g-cobalt',n:'观光玻璃梯 FR-P',d:'270° 全景井道，光影与景观共生。',p:'定制型材'},
+    {ic:'badge',hue:'g-plum',n:'定制艺术梯 FR-B',d:'手工铜饰 / 木饰面，专属私邸设计。',p:'一对一设计'},
+    {ic:'scan',hue:'g-ember',n:'旧梯焕新 FR-R',d:'既有别墅梯升级延寿，焕新如初。',p:'评估报价'}
+  ];
+  return `<div class="page">
+    <div class="search stagger">${icon('search',16)} 梯型 / 井道条件 / 风格</div>
+    <div class="section-title stagger" style="margin-top:var(--s2)">电梯系列 · 6</div>
+    <div class="hscroll stagger" style="flex-wrap:wrap;overflow:visible;gap:var(--s2)">
+      ${p.map(x=>`<div class="pcard card glow ${x.hue}" style="flex:0 0 calc(50% - 4px)"><div class="pc-ic">${icon(x.ic,20)}</div><div class="pc-name">${x.n}</div><div class="pc-desc">${x.d}</div><div class="pc-price">${x.p}</div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function tabMaintenance(){
+  const svc = [
+    {ic:'tools',  t:'常规保养',     s:'半月 / 季度 / 半年保 · TSG T5002-2017', r:'28min'},
+    {ic:'shield', t:'年检代办',     s:'特种设备法定检验，全程代办归档',       r:'一次通过'},
+    {ic:'wifi',   t:'智慧物联监测', s:'24h 在线监测，故障主动预警',           r:'已接入'},
+    {ic:'gear',   t:'原厂配件更换', s:'德国原厂部件，质保全程可追溯',         r:'原厂直供'},
+    {ic:'scan',   t:'故障急修',     s:'一键报修，技工就近到场',               r:'&lt;30min'}
+  ];
+  return `<div class="page">
+    <div class="search stagger">${icon('search',16)} 工单号 / 设备编号 / 服务类型</div>
+    <div class="section-title stagger" style="margin-top:var(--s2)">服务总览</div>
+    <div class="card mini-stats stagger">
+      <div><div class="ms-n">28min</div><div class="ms-l">平均响应</div></div>
+      <div><div class="ms-n">12,800</div><div class="ms-l">在保设备</div></div>
+      <div><div class="ms-n">98.6%</div><div class="ms-l">一次修复率</div></div>
+    </div>
+    <div class="section-title stagger">维保服务 · 5</div>
+    ${svc.map(x=>`<div class="card svc-row stagger"><div class="svc-ic">${icon(x.ic,20)}</div><div class="svc-main"><div class="svc-t">${x.t}</div><div class="svc-s">${x.s}</div></div><div class="svc-r">${x.r}</div></div>`).join('')}
+    <div class="section-title stagger">近期工单</div>
+    <div class="card tl-row stagger">
+      <div class="tl-dot done"></div>
+      <div class="tl-main"><div class="tl-t">季度保 · 已完成</div><div class="tl-s">常熟旗舰店 FR-T · 32 项作业全部合格</div></div>
+      <div class="tl-time">10/28</div>
+    </div>
+    <div class="card tl-row stagger">
+      <div class="tl-dot"></div>
+      <div class="tl-main"><div class="tl-t">报修 · 处理中</div><div class="tl-s">门机异响 · 技工已派单，预计 14:30 到场</div></div>
+      <div class="tl-time">11/01</div>
+    </div>
+    <button class="btn cta btn-block stagger" style="margin-top:var(--s2)">${icon('phone',18)} 一键报修</button>
+  </div>`;
+}
+
+function rolePanel(roleKey){
+  const p = ROLE_PANEL[roleKey];
+  return `<div class="card role-panel glow-soft ${p.hue} stagger" data-page="${p.page}" role="button" tabindex="0"
+              aria-label="${p.title} 查看详情">
+    <div class="rp-head"><span class="rp-tag">${p.tag}</span><span class="status-pill ${p.statusCls}">${p.status}</span></div>
+    <div class="rp-title">${p.title}</div>
+    <div class="rp-main"><span class="data">${p.big}</span><span class="rp-unit">${p.unit}</span></div>
+    <div class="rp-biglabel">${p.bigLabel}</div>
+    <div class="rp-bar"><i style="width:${p.bar}%"></i></div>
+    <div class="rp-barlabel"><span>${p.barLabel}</span><span>${p.bar}%</span></div>
+    <div class="rp-meta">${p.meta.map(m=>`<div><div class="k">${m[0]}</div><div class="v">${m[1]}</div></div>`).join('')}</div>
+    <div class="rp-more">${icon(p.moreIcon||'dashboard',16)} ${p.more}<span class="go">${icon('chevron',16,{rot:90})}</span></div>
+  </div>`;
+}
+
+function listRow(o){
+  const right = o.toggle
+    ? `<span class="tgl ${o.on?'on':''}" role="switch" aria-checked="${o.on?'true':'false'}" aria-label="${o.t}"></span>`
+    : (o.val ? `<span class="lr-val">${o.val}</span>` : '')
+      + `<span class="lr-arrow">${icon('chevron',18,{rot:90})}</span>`;
+  return `<div class="list-row"><div class="lr-ic">${icon(o.ic,18)}</div>
+    <div style="flex:1;min-width:0"><div class="lr-t">${o.t}</div>${o.s?`<div class="lr-s">${o.s}</div>`:''}</div>${right}</div>`;
+}
+
+/* 「分享成为会员」——各角色的价值主张与归属规则各不相同 */
+const INVITE_COPY = {
+  member:{ sub:'弗朗茨会员 · 推荐有礼', t:'邀请成为会员', s:'推荐成功双方各得 ¥2,000 家庭礼包' },
+  sales:{  sub:'华东大区 · 业务员 · 李航', t:'分享会员邀请码', s:'客户扫码注册即自动归属你名下，佣金照常结算' },
+  worker:{ sub:'上海安装队 · 技师 · 张建国', t:'推荐业主建档成为会员', s:'推荐成交后计入你的推荐业绩' },
+  admin:{  sub:'品牌总部 · 运营 · 王敏', t:'开通会员邀请通道', s:'生成渠道邀请码，并指派会员归属业务员' }
+};
+
+function tabMine(roleKey){
+  const r = ROLES[roleKey];
+  const m = r.messages;
+  const iv = INVITE_COPY[roleKey];
+  const fn = r.mine.map(x=>`<div class="fn-item"${x.page?` data-page="${x.page}" role="button" tabindex="0"`:''}>
+    <div class="fn-ic">${icon(x.ic,20)}</div>
+    <div class="fn-body"><div class="fn-t">${x.t}</div>${x.note?`<div class="fn-note">${x.note}</div>`:''}</div>
+    ${x.page?`<div class="fn-go">${icon('chevron',16,{rot:-90})}</div>`:''}</div>`).join('');
+  const support = [
+    {ic:'headset',    t:'在线客服',       val:'09:00–21:00'},
+    {ic:'fileCopy',   t:'使用与保养手册', val:''},
+    {ic:'helpCircle', t:'常见问题',       val:''},
+    {ic:'info',       t:'关于弗朗茨',     val:'v1.0.0'}
+  ];
+  const settings = [
+    {ic:'bell',   t:'消息通知', toggle:true, on:true},
+    {ic:'shield', t:'隐私与权限', val:''},
+    {ic:'globe',  t:'语言',       val:'简体中文'}
+  ];
+  return `<div class="page">
+    <div class="profile card stagger">
+      <div class="avatar">${r.user.slice(0,1)}</div>
+      <div><div class="pc-name">${r.user}</div><div class="pc-sub">${r.org}</div><div class="pc-info">${r.info}</div><div class="pc-role">${icon('badge',14)} ${r.name}</div></div>
+    </div>
+    <div class="msg-banner stagger ${m>0?'has':''}">
+      <div class="mb-ic">${icon('bell',20)}</div>
+      <div style="flex:1"><div class="mb-t">${m>0?`您有 ${m} 条新消息`:'消息通知'}</div><div class="mb-s">${m>0?'含 1 条急修派单':'暂无未读消息'}</div></div>
+      <div class="mb-go">${m>0?'查看':icon('chevron',18,{rot:90})}</div>
+    </div>
+    ${rolePanel(roleKey)}
+    <div class="card invite-card glow-soft g-plum stagger" data-page="d-invite" role="button" tabindex="0"
+         aria-label="${iv.t}">
+      <div class="invite-ic">${icon('gift',22)}</div>
+      <div class="invite-body"><div class="invite-t">${iv.t}</div><div class="invite-s">${iv.s}</div></div>
+      <div class="fn-go">${icon('chevron',16,{rot:-90})}</div>
+    </div>
+    <div class="section-title stagger">常用功能</div>
+    <div class="fn-grid stagger">${fn}</div>
+    <div class="section-title stagger">服务与支持</div>
+    <div class="card list-card stagger">${support.map(listRow).join('')}</div>
+    <div class="section-title stagger">设置</div>
+    <div class="card list-card stagger">${settings.map(listRow).join('')}</div>
+    <div class="switch-entry card stagger" data-role-switch>
+      <div class="se-ic">${icon('badge',18)}</div>
+      <div class="se-t">切换身份</div>
+      <div class="se-go">${icon('chevron',18,{rot:90})}</div>
+    </div>
+    <button class="btn ghost btn-block stagger" style="margin-top:var(--s3)">${icon('logout',18)} 退出登录</button>
+    <div class="version stagger">FRANZ HOME LIFT · v1.0.0</div>
+  </div>`;
+}
+
+/* ===================== Detail pages · role business modules ===================== */
+function dpHead(title, sub){
+  return `<div class="dp-head stagger">
+    <div class="dp-back" data-back role="button" tabindex="0" aria-label="返回">${icon('arrowL',18,{sw:1.6})}</div>
+    <div style="min-width:0"><div class="dp-title">${title}</div><div class="dp-sub">${sub}</div></div>
+  </div>`;
+}
+function segTabs(items, activeIdx){
+  return `<div class="seg-tabs stagger">${items.map((t,i)=>
+    `<div class="seg-tab${i===activeIdx?' on':''}" data-seg="${i}" role="tab" aria-selected="${i===activeIdx}">${t}</div>`).join('')}</div>`;
+}
+function kpiCard(cells, hue){
+  return `<div class="card dp-kpi glow-soft ${hue} stagger">${cells.map(c=>`<div>
+      <div class="k-n${c.dec?' dec':''}">${c.raw!==undefined
+        ? `<span>${c.raw}</span>`
+        : `<span data-to="${c.to}"${c.dec?` data-dec="${c.dec}"`:''} data-fmt="plain">0</span>`}${c.unit?`<span class="u">${c.unit}</span>`:''}</div>
+      <div class="k-l">${c.l}</div></div>`).join('')}</div>`;
+}
+function taskCard(o){
+  const tags = `<div class="tk-tags">${o.pill?`<span class="status-pill ${o.pillCls||'sp-run'}">${o.pill}</span>`:''}${o.chip?`<span class="chip">${o.chip}</span>`:''}${o.chip2?`<span class="chip">${o.chip2}</span>`:''}</div>`;
+  const main = `<div class="tk-main"><div class="tk-t">${o.t}</div><div class="tk-s">${o.s}</div>${tags}</div>`;
+  /* actions live in a bottom bar so the title column gets the full row */
+  if(o.actions){
+    const btns = o.actions.map((a,i)=>
+      `<button class="tk-btn wide ${i===0?'solid':''}${a[2]==='reject'?' reject':''}">${a[0]}</button>`).join('');
+    return `<div class="card task-col stagger">
+      <div class="task-top"><div class="tk-time">${o.time}</div>${main}</div>
+      <div class="tk-foot">${btns}</div>
+    </div>`;
+  }
+  const act = o.action
+    ? `<div class="tk-foot end"><button class="tk-btn ${o.action[1]?'solid':''}">${o.action[0]}</button></div>`
+    : '';
+  return `<div class="card task-col stagger"><div class="task-top"><div class="tk-time">${o.time}</div>${main}</div>${act}</div>`;
+}
+function rnk(o){
+  return `<div class="rnk-row"><div class="rnk-n${o.top?' top':''}">${o.n}</div>
+    <div class="rnk-main"><div class="rnk-t">${o.t}</div>${o.s?`<div class="rnk-s">${o.s}</div>`:''}</div>
+    ${o.v?`<div class="rnk-v${o.vCls?' '+o.vCls:''}">${o.v}</div>`:''}</div>`;
+}
+/* deterministic QR-looking matrix (linear SVG, no emoji, no external asset) */
+function qrSvg(px=88){
+  const n=21, seed0=20261101; let seed=seed0;
+  const rnd=()=> (seed=(seed*1103515245+12345)&0x7fffffff)/0x7fffffff;
+  const m=Array.from({length:n},()=>Array(n).fill(0));
+  const finder=(ox,oy)=>{for(let y=0;y<7;y++)for(let x=0;x<7;x++){
+    const edge=x===0||x===6||y===0||y===6, core=x>=2&&x<=4&&y>=2&&y<=4;
+    m[oy+y][ox+x]=(edge||core)?1:0;}};
+  finder(0,0); finder(n-7,0); finder(0,n-7);
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+    const inF=(x<8&&y<8)||(x>n-9&&y<8)||(x<8&&y>n-9);
+    if(!inF) m[y][x]= rnd()>0.54?1:0;
+  }
+  let body='';
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++) if(m[y][x]) body+=`<rect x="${x}" y="${y}" width="1" height="1"/>`;
+  return `<svg class="qr" width="${px}" height="${px}" viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges"
+    fill="#14171B" role="img" aria-label="专属推广二维码"><rect width="${n}" height="${n}" fill="#ffffff"/>${body}</svg>`;
+}
+
+/* ---------- 业务员 · 业绩中心 ---------- */
+function detailSales(){
+  const target = `<div class="card pad glow-soft g-plum stagger">
+    <div class="rp-head"><span class="rp-tag">TARGET · 月度目标</span><span class="status-pill sp-run">达成 72%</span></div>
+    <div class="rp-main"><span class="data">48.6</span><span class="rp-unit">/ 68.0 万</span></div>
+    <div class="rp-biglabel">距目标还差 ¥19.4 万 · 剩余 21 天</div>
+    <div class="rp-bar"><i style="width:72%"></i></div>
+    <div class="rp-barlabel"><span>目标完成度</span><span>72%</span></div>
+  </div>`;
+  return `<div class="page">
+    ${dpHead('业绩中心','华东大区 · 业务员 · 李航')}
+    ${segTabs(['本月','本季','本年'],0)}
+    ${kpiCard([{to:48.6,dec:1,unit:'万',l:'签约额'},{to:8,l:'新增客户'},{to:2.4,dec:1,unit:'万',l:'计提佣金'}],'g-plum')}
+    ${target}
+    <div class="section-title stagger">大区业绩排行 <span class="st-count">本月 · 4 人</span></div>
+    <div class="card list-card stagger">
+      ${rnk({n:1,top:1,t:'李航 · 我',s:'华东大区 · 8 单',v:'¥48.6万'})}
+      ${rnk({n:2,t:'周涛',s:'苏南组 · 7 单',v:'¥44.2万'})}
+      ${rnk({n:3,t:'沈倩',s:'沪西组 · 6 单',v:'¥38.9万'})}
+      ${rnk({n:4,t:'何斌',s:'皖中组 · 5 单',v:'¥31.5万'})}
+    </div>
+    <div class="section-title stagger">我的客户 <span class="st-count">${myClients().length} 位在跟</span></div>
+    <div class="card list-card stagger">
+      ${myClients().map(o=>`<div class="list-row" data-page="d-client" data-arg="${o.i}"><div class="lr-ic">${icon(o.c.ic||'user',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">${o.c.key} · ${o.c.city.replace('市','')}${o.c.addr}</div><div class="lr-s">${o.c.model} · ${o.c.stage}</div></div>
+        <span class="lr-val">${o.c.amount}</span><span class="lr-arrow">${icon('chevron',18,{rot:90})}</span></div>`).join('')}
+    </div>
+    <div class="section-title stagger">专属推广码</div>
+    <div class="card pad stagger">
+      <div class="qr-wrap">${qrSvg(88)}
+        <div class="qr-main" style="flex:1;min-width:0">
+          <div class="tk-t">邀请码 FRL-8H42</div>
+          <div class="tk-s">客户扫码自动绑定我的业绩<br/>已带来 12 次到店 · 3 单成交</div>
+        </div>
+      </div>
+      <button class="tk-btn" style="margin-top:var(--s3)" data-copy="FRL-8H42">复制邀请码</button>
+    </div>
+    <div class="section-title stagger">佣金明细</div>
+    <div class="card list-card stagger">
+      ${rnk({n:'28',t:'¥8,600',s:'王珮 · 佘山别墅 FR-S · 首笔回款',v:'已结算',vCls:''})}
+      ${rnk({n:'22',t:'¥6,240',s:'周振 · 西溪合院 FR-P · 首笔回款',v:'已结算'})}
+      ${rnk({n:'16',t:'¥5,180',s:'李岚 · 苏州园区 FR-T · 定金',v:'已计提'})}
+      ${rnk({n:'09',t:'¥4,380',s:'陈女士 · 无锡金域 FR-S · 尾款',v:'待结算',vCls:'amt pos'})}
+    </div>
+    <button class="btn ghost btn-block stagger" style="margin-top:var(--s4)">${icon('fileCopy',18)} 导出业绩报表</button>
+  </div>`;
+}
+
+/* ---------- shared business data (clients / members / tech / certificates) ---------- */
+const CLIENTS = [
+  { key:'王珮', phone:'138 0172 4488', city:'上海市松江区', addr:'佘山别墅 G17 栋', model:'螺杆家梯 FR-S',
+    code:'3110 7100 2013 0015', stage:'已签约', amount:'¥18.6万', sign:'2026.09.28',
+    owner:'李航', source:'扫码邀请', since:'2026.09.28', code2:'FRL-8H42',
+    svc:[['已安装完成','FR-S 整机安装 · 验收合格'],['正在质保','整机 10 年 · 年检代办中']],
+    mnt:[['2026.10.28','季度保 · 32 项','张建国','全部合格','sp-ok'],
+         ['2026.10.12','半月保 · 18 项','徐磊','全部合格','sp-ok'],
+         ['2026.08.16','半年保 · 含限速器校验','张建国','全部合格','sp-ok']] },
+  { key:'周振', phone:'139 2311 9076', city:'浙江省杭州市', addr:'西溪合院 12 号', model:'观光玻璃梯 FR-P',
+    code:'3110 7100 2013 0042', stage:'方案确认', amount:'¥22.4万', sign:'2026.10.15',
+    owner:'李航', source:'管理员分配', since:'2026.10.15', code2:'',
+    svc:[['排产中','预计 2026.12 进场安装']],
+    mnt:[['2026.10.26','井道复尺勘测','徐磊','出具复尺报告','sp-ok']] },
+  { key:'李岚', phone:'136 8812 3360', city:'江苏省苏州市', addr:'园区独栋 9 号', model:'曳引平台梯 FR-T',
+    code:'3110 7100 2013 0058', stage:'已量尺', amount:'¥15.8万', sign:'—',
+    owner:'李航', source:'管理员分配', since:'2026.10.22', code2:'',
+    svc:[['待签约','井道复尺已完成 · 报价已出']],
+    mnt:[['2026.10.22','上门量尺 · 井道初勘','张建国','待出报价','sp-run']] },
+  { key:'何婧', phone:'150 3341 2207', city:'安徽省合肥市', addr:'华润润府 3 幢', model:'液压别墅梯 FR-H',
+    code:'—', stage:'待跟进', amount:'¥12.2万', sign:'—',
+    owner:'李航', source:'扫码邀请', since:'2026.10.29', code2:'FRL-8H42',
+    svc:[['待量尺','首次咨询 · 已发送电子手册']],
+    mnt:[] },
+  /* 尚未分配归属的会员 —— 管理员在「会员分配」中指派给业务员后才会出现在其客户列表 */
+  { key:'顾承', phone:'137 6621 0054', city:'江苏省无锡市', addr:'金域香颂 8 号', model:'旧梯焕新 FR-R',
+    code:'—', stage:'已注册', amount:'—', sign:'—',
+    owner:'', source:'官网到访', since:'2026.10.31', code2:'',
+    svc:[['待分配','官网留资 · 等待指派专属业务员']],
+    mnt:[] }
+];
+const SALES_TEAM = ['李航','周涛','沈倩','何斌'];
+/* the signed-in salesperson only sees members attributed to them */
+function myClients(){
+  const me = ROLES.sales.user;
+  return CLIENTS.map((c,i)=>({ c, i })).filter(o=>o.c.owner===me);
+}
+const unassignedCount = () => CLIENTS.filter(c=>!c.owner).length;
+
+/* ===================== Maintenance orders (dispatch calendar source of truth) ===================== */
+const ORDER_ST = {
+  '待安排':{pill:'sp-warn', dot:'dt-warn'},
+  '待服务':{pill:'sp-run',  dot:'dt-run'},
+  '进行中':{pill:'sp-run',  dot:'dt-run'},
+  '已完成':{pill:'sp-ok',   dot:'dt-ok'},
+  '已跳过':{pill:'sp-stop', dot:'dt-stop'}
+};
+/* d = day of month in DISPATCH.m; cyc = recurring schedule; skip = skip evidence */
+const ORDERS = [
+  { id:'FR-24110301', d:3,  t:'季度保',   m:'王珮', addr:'松江 · 佘山别墅 G17',  tech:'',       time:'09:30', st:'待安排' },
+  { id:'FR-24110302', d:3,  t:'半月保',   m:'周振', addr:'松江 · 泰晤士小镇',     tech:'沈志强', time:'14:00', st:'待服务' },
+  { id:'FR-24110501', d:5,  t:'故障维修', m:'李岚', addr:'苏州园区 · 湖畔天城',   tech:'',       time:'10:30', st:'待安排' },
+  { id:'FR-24110601', d:6,  t:'季度保',   m:'何婧', addr:'无锡金域 · 蓝湾 3 幢',  tech:'张建国', time:'09:00', st:'已完成',
+    cyc:{ name:'季度保', next:'2027-02-06', lead:15, auto:true } },
+  { id:'FR-24110901', d:9,  t:'季度保',   m:'顾承', addr:'常熟 · 中南锦城 12 幢', tech:'',       time:'13:30', st:'待安排' },
+  { id:'FR-24111201', d:12, t:'半月保',   m:'王珮', addr:'松江 · 佘山别墅 G17',  tech:'沈志强', time:'09:30', st:'已跳过',
+    skip:{ reason:'业主长期外出', note:'业主 11 月中旬出境，家中无人接待，已电话确认顺延至 12 月。', photo:'门禁照片 2 张' } },
+  { id:'FR-24111501', d:15, t:'年度自检', m:'周振', addr:'松江 · 泰晤士小镇',     tech:'张建国', time:'10:00', st:'待服务' },
+  { id:'FR-24111801', d:18, t:'季度保',   m:'李岚', addr:'苏州园区 · 湖畔天城',   tech:'',       time:'15:00', st:'待安排' },
+  { id:'FR-24112101', d:21, t:'故障维修', m:'何婧', addr:'无锡金域 · 蓝湾 3 幢',  tech:'赵工',   time:'11:00', st:'进行中' },
+  { id:'FR-24112401', d:24, t:'半月保',   m:'顾承', addr:'常熟 · 中南锦城 12 幢', tech:'沈志强', time:'09:00', st:'已完成',
+    cyc:{ name:'半月保', next:'2026-12-09', lead:7, auto:true } },
+  { id:'FR-24112801', d:28, t:'季度保',   m:'王珮', addr:'松江 · 佘山别墅 G17',  tech:'',       time:'14:30', st:'待安排' }
+];
+const TECH_TEAM = ['张建国','沈志强','赵工','徐磊'];
+const DISPATCH = { y:2026, m:10, day:3, filter:'全部' };   /* m is 0-based → 2026-11 */
+const MONTH_CN = ['1 月','2 月','3 月','4 月','5 月','6 月','7 月','8 月','9 月','10 月','11 月','12 月'];
+const WD_CN = ['一','二','三','四','五','六','日'];
+const pad2 = n => String(n).padStart(2,'0');
+
+/* orders of a given day, limited to the current filter */
+const ordOfDay = d => ordFiltered().filter(x=>x.o.d===d);
+const ordFiltered = () => ORDERS.map((o,i)=>({o,i}))
+  .filter(x=>DISPATCH.filter==='全部' || x.o.st===DISPATCH.filter);
+const monthOrders = () => DISPATCH.y===2026 && DISPATCH.m===10 ? ORDERS : [];
+
+/* admin: member permission sets */
+const MEMBER_PERMS = [
+  { name:'陈晓', org:'上海佘山别墅 · 业主', model:'FR-T 曳引平台梯', role:'主账号',
+    perms:[['viewRun','查看运行数据',1],['book','预约维保',1],['repair','提交报修',1],['bill','账单与续费',1],['export','导出设备台账',0],['sub','子账号管理',1]] },
+  { name:'周女士', org:'杭州西溪合院 · 业主', model:'FR-P 观光玻璃梯', role:'主账号',
+    perms:[['viewRun','查看运行数据',1],['book','预约维保',1],['repair','提交报修',0],['bill','账单与续费',0],['export','导出设备台账',0],['sub','子账号管理',0]] },
+  { name:'李先生', org:'苏州园区独栋 · 家庭成员', model:'FR-T 曳引平台梯', role:'子账号',
+    perms:[['viewRun','查看运行数据',1],['book','预约维保',0],['repair','提交报修',1],['bill','账单与续费',0],['export','导出设备台账',0],['sub','子账号管理',0]] },
+  { name:'吴先生', org:'合肥华润润府 · 业主', model:'FR-H 液压别墅梯', role:'主账号（未验收）',
+    perms:[['viewRun','查看运行数据',0],['book','预约维保',0],['repair','提交报修',0],['bill','账单与续费',0],['export','导出设备台账',0],['sub','子账号管理',0]] }
+];
+
+/* field technician profile — tappable from the owner's pages */
+const TECH = {
+  name:'张建国', org:'上海安装队 · 技师', id:'FR-ST-1042', years:'12 年',
+  stats:[['486','累计工单'],['312','服务家庭'],['4.9','业主评分']],
+  certs:[['特种设备作业人员证','项目 T1 · 有效期至 2028.05','sp-ok','有效'],
+         ['低压电工作业证','有效期至 2027.11','sp-ok','有效'],
+         ['高处作业操作证','有效期至 2026.12 · 30 天内到期','sp-warn','即将到期']]
+};
+
+/* ---------- 安装维保 · 今日工单 ---------- */
+function detailWorker(){
+  return `<div class="page">
+    ${dpHead('今日工单','上海安装队 · 技师 · 张建国')}
+    ${segTabs(['今日','本周','全部'],0)}
+    ${kpiCard([{to:3,l:'今日待完成'},{to:2,l:'待验收'},{to:46,l:'本月工单'}],'g-ember')}
+    <div class="section-title stagger">今日排班 <span class="st-count">11 月 1 日 · 周六</span></div>
+    ${taskCard({time:'09:30',t:'竣工验收 · 螺杆家梯 FR-S',s:'上海佘山 · 王宅 G17 · 3 层 3 站',pill:'待验收',pillCls:'sp-warn',chip:'工单 FR-24110102',chip2:'超时风险 12min',actions:[['完成验收'],['上报延期']]})}
+    ${taskCard({time:'13:00',t:'季度保 · 曳引平台梯 FR-T',s:'苏州园区 · 李宅 · 32 项作业清单',pill:'待服务',pillCls:'sp-run',chip:'工单 FR-24110107',action:['到场打卡',1]})}
+    ${taskCard({time:'15:30',t:'安装进场 · 观光玻璃梯 FR-P',s:'杭州西溪 · 周宅 · 井道已复尺',pill:'待服务',pillCls:'sp-run',chip:'工单 FR-24110113',action:['导航前往']})}
+    <div class="section-title stagger">本周排期</div>
+    <div class="card tl-row stagger"><div class="tl-dot done"></div>
+      <div class="tl-main"><div class="tl-t">半月保 · 已完成</div><div class="tl-s">常熟体验中心 FR-T · 作业 18 项</div></div><div class="tl-time">10/29</div></div>
+    <div class="card tl-row stagger"><div class="tl-dot done"></div>
+      <div class="tl-main"><div class="tl-t">旧梯焕新勘测 · 已完成</div><div class="tl-s">无锡金域 FR-R · 出具焕新方案</div></div><div class="tl-time">10/30</div></div>
+    <div class="card tl-row stagger"><div class="tl-dot"></div>
+      <div class="tl-main"><div class="tl-t">今天的 3 项任务</div><div class="tl-s">1 项验收 · 2 项上门服务</div></div><div class="tl-time">11/01</div></div>
+    <div class="card tl-row stagger"><div class="tl-dot"></div>
+      <div class="tl-main"><div class="tl-t">安排中 · 2 项待派</div><div class="tl-s">系统将于 08:00 自动派单</div></div><div class="tl-time">11/02</div></div>
+    <div class="section-title stagger">资质证书 <span class="st-more" data-page="d-cert">上传证照 ${icon('chevron',14,{rot:90})}</span></div>
+    <div class="card list-card stagger">
+      ${listRow({ic:'certificate',t:'特种设备作业人员证',s:'项目 T1 · 有效期至 2028.05',val:'有效'})}
+      ${listRow({ic:'certificate',t:'低压电工作业证',s:'有效期至 2027.11',val:'有效'})}
+      ${listRow({ic:'certificate',t:'高处作业操作证',s:'有效期至 2026.12 · 30 天内到期',val:'即将到期'})}
+    </div>
+    <div class="section-title stagger">备件申领 <span class="st-more" data-page="d-parts">去申领 ${icon('chevron',14,{rot:-90})}</span></div>
+    <div class="card list-card stagger">
+      <div class="list-row" data-page="d-parts"><div class="lr-ic">${icon('box',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">随车备件 12 件</div><div class="lr-s">缓冲器油 × 2 审批中 · 本月已领 8 件</div></div>
+        <span class="lr-arrow">${icon('chevron',18,{rot:-90})}</span></div>
+      ${listRow({ic:'fileCopy',t:'本月作业 46 单',s:'平均作业 42min · 一次通过率 96%',val:'record'})}
+    </div>
+  </div>`;
+}
+
+/* ---------- 管理员 · 运营总览 ---------- */
+function detailAdmin(){
+  const bars = [['6月',62],['7月',71],['8月',58],['9月',76],['10月',69],['11月',84]];
+  return `<div class="page">
+    ${dpHead('运营总览','品牌总部 · 运营 · 王敏')}
+    ${kpiCard([{to:128,l:'本月工单'},{to:84,unit:'%',l:'闭环率'},{to:4,l:'在营门店'}],'g-cobalt')}
+    <div class="card mini-stats stagger" style="margin-top:var(--s2)">
+      <div><div class="ms-n">12,800</div><div class="ms-l">在保设备</div></div>
+      <div><div class="ms-n">36</div><div class="ms-l">服务网点</div></div>
+      <div><div class="ms-n">0</div><div class="ms-l">待处理投诉</div></div>
+    </div>
+    <div class="section-title stagger">待办审核 <span class="st-count">6 项</span></div>
+    ${taskCard({time:'09:12',t:'年报抽查 · 常熟体验中心',s:'抽查 32 项 · 提交人：王敏',pill:'待审核',pillCls:'sp-warn',chip:'SPOT-2411-03',actions:[['通过'],['驳回','reject']]})}
+    ${taskCard({time:'10:05',t:'延保续费工单 · 佘山王宅',s:'业主申请延保 3 年 · 业务员：李航',pill:'待审核',pillCls:'sp-warn',chip:'WO-2411-014',actions:[['通过'],['驳回','reject']]})}
+    ${taskCard({time:'11:20',t:'业务员权限变更 · 周涛',s:'申请开通华东大区全量查询',pill:'待审核',pillCls:'sp-warn',chip:'AUTH-2411-06',actions:[['通过'],['驳回','reject']]})}
+    <div class="section-title stagger">维保工单 <span class="st-more" data-page="d-orders">全部记录 ${icon('chevron',14,{rot:90})}</span></div>
+    <div class="card list-card stagger">
+      <div class="list-row" data-page="d-dispatch"><div class="lr-ic">${icon('calendar',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">安排维保工单</div><div class="lr-s">选择会员与上门时间 · 指派技师派单</div></div>
+        <span class="lr-arrow">${icon('chevron',18,{rot:90})}</span></div>
+      <div class="list-row" data-page="d-orders"><div class="lr-ic">${icon('assignment',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">全部工单记录</div><div class="lr-s">本月 128 单 · 闭环率 84% · 可按状态筛选</div></div>
+        <span class="lr-arrow">${icon('chevron',18,{rot:90})}</span></div>
+    </div>
+    <div class="section-title stagger">数据看板 <span class="st-count">近 6 月工单量</span></div>
+    <div class="card stagger">
+      <div class="bars">${bars.map((b,i)=>`<div class="bar${i===bars.length-1?' hi':''}" style="height:${Math.round(b[1]*0.8)}px"></div>`).join('')}</div>
+      <div class="bar-labels">${bars.map(b=>`<div>${b[0]}</div>`).join('')}</div>
+    </div>
+    <div class="section-title stagger">门店查询 <span class="st-count">仅查询</span></div>
+    <div class="search stagger">${icon('search',16)} 门店名称 / 城市 / 负责人</div>
+    <div class="card list-card stagger">
+      <div class="list-row"><div class="lr-ic">${icon('location',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">${STORE_NAME}</div><div class="lr-s">${STORE_ADDR}</div></div>
+        <span class="chip">仅查询</span></div>
+    </div>
+    <div class="section-title stagger">人员与权限</div>
+    <div class="card list-card stagger">
+      ${listRow({ic:'userGroup',t:'业务员',s:'在编 6 人 · 华东 / 苏南 / 皖中',val:'6'})}
+      ${listRow({ic:'tools',t:'安装维保技师',s:'在编 12 人 · 持证率 100%',val:'12'})}
+      ${listRow({ic:'shield',t:'管理员',s:'总部运营 · 含 1 个超管账号',val:'2'})}
+      ${listRow({ic:'badge',t:'待授权申请',s:'周涛 · 申请大区全量查询',val:'1'})}
+    </div>
+    <div class="section-title stagger">会员权限 <span class="st-more" data-page="d-perm" data-arg="0">设置 ${icon('chevron',14,{rot:90})}</span></div>
+    <div class="card list-card stagger">
+      ${MEMBER_PERMS.map((x,j)=>`<div class="list-row" data-page="d-perm" data-arg="${j}"><div class="lr-ic">${icon('keyIcon',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">${x.name} · ${x.role}</div><div class="lr-s">${x.org} · 已开启 ${x.perms.filter(p=>p[2]).length}/${x.perms.length} 项权限</div></div>
+        <span class="lr-arrow">${icon('chevron',18,{rot:90})}</span></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ---------- 管理员 · 安排维保工单（日历优先：选日期 → 选工单 → 指派技师） ---------- */
+function calCellsHtml(){
+  const isNov = DISPATCH.y===2026 && DISPATCH.m===10;
+  const offset = (new Date(DISPATCH.y, DISPATCH.m, 1).getDay()+6)%7;   /* Monday-first */
+  const days = new Date(DISPATCH.y, DISPATCH.m+1, 0).getDate();
+  let out = '';
+  for(let k=0;k<offset;k++) out += `<div class="cal-cell cal-blank"></div>`;
+  for(let d=1; d<=days; d++){
+    const list = isNov ? ordOfDay(d) : [];
+    const dots = list.slice(0,3).map(x=>`<i class="${ORDER_ST[x.o.st].dot}"></i>`).join('');
+    const on = d===DISPATCH.day;
+    out += `<div class="cal-cell${on?' on':''}${isNov&&d===1?' today':''}" data-day="${d}" role="button" tabindex="0"
+      aria-label="${DISPATCH.m+1} 月 ${d} 日${list.length?' · '+list.length+' 单':''}">
+      <span class="cal-d">${d}</span><span class="cal-dots">${dots}</span></div>`;
+  }
+  return out;
+}
+function dayListHtml(){
+  const isNov = DISPATCH.y===2026 && DISPATCH.m===10;
+  const list = isNov ? ordOfDay(DISPATCH.day) : [];
+  const wd = WD_CN[(new Date(DISPATCH.y, DISPATCH.m, DISPATCH.day).getDay()+6)%7];
+  const head = `<div class="day-head">
+    <span class="day-t">${DISPATCH.m+1} 月 ${DISPATCH.day} 日 · 周${wd}</span>
+    <span class="day-n">${list.length} 单${DISPATCH.filter!=='全部'?' · '+DISPATCH.filter:''}</span></div>`;
+  if(!list.length){
+    return head + `<div class="card pad"><div class="notice" style="margin:0; padding:0">当日暂无${DISPATCH.filter==='全部'?'':DISPATCH.filter}维保工单，可切换日期或筛选条件</div></div>`;
+  }
+  return head + `<div class="card list-card">${list.map(({o,i})=>`
+    <div class="list-row" data-page="d-order" data-arg="${i}">
+      <div class="lr-ic">${icon('tools',18)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="lr-t">${o.t} · ${o.m}</div>
+        <div class="lr-s">${o.time} · ${o.addr} · ${o.tech||'未指派'}</div>
+      </div>
+      <span class="status-pill ${ORDER_ST[o.st].pill}">${o.st}</span>
+    </div>`).join('')}</div>`;
+}
+function detailDispatch(){
+  const mine = monthOrders();
+  const cnt = st => mine.filter(o=>o.st===st).length;
+  const filters = [['全部',mine.length],['待安排',cnt('待安排')],['待服务',cnt('待服务')],
+                   ['进行中',cnt('进行中')],['已完成',cnt('已完成')],['已跳过',cnt('已跳过')]];
+  return `<div class="page">
+    ${dpHead('安排维保工单','品牌总部 · 运营 · 王敏')}
+    <div class="card pad stagger glow-soft g-cobalt">
+      <div class="cal-head">
+        <div class="cal-month">${DISPATCH.y} 年 ${MONTH_CN[DISPATCH.m]}<small>${mine.length} 单在册</small></div>
+        <div class="cal-nav">
+          <div class="cal-btn" data-month="-1" role="button" tabindex="0" aria-label="上个月">${icon('chevron',16,{rot:90})}</div>
+          <div class="cal-btn" data-month="1" role="button" tabindex="0" aria-label="下个月">${icon('chevron',16,{rot:-90})}</div>
+        </div>
+      </div>
+      <div class="chips" style="margin-top:var(--s3)">
+        ${filters.map(f=>`<span class="chip${DISPATCH.filter===f[0]?' on':''}" data-filter="${f[0]}">${f[0]} ${f[1]}</span>`).join('')}
+      </div>
+      <div class="cal-wd">${WD_CN.map(w=>`<span>${w}</span>`).join('')}</div>
+      <div class="cal-grid" id="cal-grid">${calCellsHtml()}</div>
+      <div class="cal-legend">
+        <span><i class="dt-warn"></i>待安排</span><span><i class="dt-run"></i>待服务 / 进行中</span>
+        <span><i class="dt-ok"></i>已完成</span><span><i class="dt-stop"></i>已跳过</span>
+      </div>
+    </div>
+    <div class="section-title stagger">当日工单 <span class="st-count">点击查看详情</span></div>
+    <div id="day-list" class="stagger">${dayListHtml()}</div>
+    <div class="notice stagger">流程：日历选日期 → 打开待安排工单 → 指定维保人员即完成派单，技师与业主同步收到服务通知。</div>
+    <div class="version stagger">工单数据每小时同步 · 支持导出 Excel</div>
+  </div>`;
+}
+
+/* ---------- 管理员 · 全部工单记录 ---------- */
+function detailOrders(){
+  const rows = ORDERS.map((o,i)=>({o,i})).sort((a,b)=>b.o.d-a.o.d);
+  return `<div class="page">
+    ${dpHead('全部工单记录','品牌总部 · 运营 · 王敏')}
+    ${segTabs(['全部','本月','未闭环'],0)}
+    ${kpiCard([{to:128,l:'本月工单'},{to:84,unit:'%',l:'闭环率'},{to:12,l:'在岗技师'}],'g-cobalt')}
+    <div class="section-title stagger">工单列表 <span class="st-count">${rows.length} 条 · 2026 年 11 月</span></div>
+    ${rows.map(({o,i})=>`<div class="card task-col stagger" data-page="d-order" data-arg="${i}" role="button" tabindex="0">
+      <div class="task-top"><div class="tk-time" style="width:48px">${pad2(DISPATCH.m+1)}-${pad2(o.d)}</div>
+        <div class="tk-main"><div class="tk-t">${o.t} · ${o.m}</div>
+          <div class="tk-s">${o.addr} · ${o.time} 上门 · ${o.tech||'未指派'}</div>
+          <div class="tk-tags"><span class="chip">${o.id}</span><span class="status-pill ${ORDER_ST[o.st].pill}">${o.st}</span></div>
+        </div></div>
+    </div>`).join('')}
+    <div class="version stagger">点击任一工单查看详情 · 数据每小时同步</div>
+  </div>`;
+}
+
+/* ---------- 管理员 · 维保工单详情 ---------- */
+function detailOrder(arg){
+  const i = +(arg||0), o = ORDERS[i] || ORDERS[0];
+  const meta = ORDER_ST[o.st];
+  const done = o.st==='已完成', skipped = o.st==='已跳过', inprog = o.st==='进行中';
+  const steps = [
+    ['创建工单','管理员 王敏 · 10-31 14:02', true],
+    ['指派维保人员', o.tech?`${o.tech} · 已接单`:'待指定维保人员', !!o.tech],
+    ['上门服务', done?'作业 32 项全部合格':(inprog?'技师已到场 · 作业中':(skipped?'本次跳过':'待上门')), done||inprog],
+    ['完成验收', done?'业主已签字确认':'待完成', done]
+  ];
+  return `<div class="page">
+    ${dpHead(o.t + ' · 工单详情', o.id + ' · ' + o.m)}
+    <div class="card pad glow-soft ${done?'g-cobalt':(skipped?'g-ember':'g-plum')} stagger">
+      <div class="rp-head"><span class="rp-tag">WORK ORDER · 维保工单</span>
+        <span class="status-pill ${meta.pill}">${o.st}</span></div>
+      <div class="rp-main"><span class="data">11/${pad2(o.d)}</span><span class="rp-unit">· ${o.time} 上门</span></div>
+      <div class="rp-biglabel">${o.m} · ${o.addr}</div>
+      <div class="rp-bar"><i style="width:${done?100:(o.tech?58:24)}%"></i></div>
+      <div class="rp-barlabel"><span>工单进度</span><span>${done?'已闭环':(o.tech?'已派单':'待指派')}</span></div>
+    </div>
+    <div class="section-title stagger">工单信息</div>
+    <div class="card list-card stagger">
+      <div class="list-row"><div class="lr-ic">${icon('user',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">${o.m}</div><div class="lr-s">${o.addr}</div></div></div>
+      <div class="list-row"><div class="lr-ic">${icon('tools',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">${o.t} · ${o.t==='故障维修'?'上门检修':'例行保养'}</div>
+          <div class="lr-s">${o.t==='季度保'?'32 项作业清单 · 含限速器校验':'18 项作业清单 · 复核门机与安全钳'}</div></div></div>
+      <div class="list-row"><div class="lr-ic">${icon('calendar',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">预约上门 2026-11-${pad2(o.d)} ${o.time}</div><div class="lr-s">时段 2 小时 · 业主在家</div></div></div>
+      <div class="list-row"><div class="lr-ic">${icon('badge',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">指派维保人员</div><div class="lr-s">${o.tech||'尚未指定，需在下方指派'}</div></div>
+        ${o.tech?`<span class="chip on">${o.tech}</span>`:`<span class="status-pill sp-warn">待指派</span>`}</div>
+    </div>
+    <div class="section-title stagger">工单进度</div>
+    <div class="card stagger" style="padding-bottom:var(--s1)">
+      ${steps.map(st=>`<div class="tl-row" style="margin-bottom:0; padding:var(--s2) var(--s3)">
+        <div class="tl-dot${st[2]?' done':''}"></div>
+        <div class="tl-main"><div class="tl-t">${st[0]}</div><div class="tl-s">${st[1]}</div></div></div>`).join('')}
+    </div>
+    ${!o.tech && !done && !skipped ? `
+    <div class="section-title stagger">指定维保人员 <span class="st-count">点击即派单</span></div>
+    <div class="card task-col stagger">
+      <div class="task-top"><div class="tk-main">
+        <div class="tk-t">${o.t} · ${o.m}</div>
+        <div class="tk-s">${o.time} 上门 · ${o.addr}</div>
+      </div></div>
+      <div class="tk-pick">${TECH_TEAM.map(n=>`<div class="pick-row" data-order="${i}" data-tech="${n}" role="radio" aria-checked="false">
+        <div class="pick-dot"></div><div class="pick-t">${n}</div>
+        <div class="pick-n">在办 ${ORDERS.filter(x=>x.tech===n && x.st!=='已完成' && x.st!=='已跳过').length} 单</div></div>`).join('')}</div>
+    </div>` : ''}
+    ${done ? `
+    <div class="section-title stagger">定时维保 <span class="st-count">自动建单</span></div>
+    <div class="card pad stagger ${o.cyc?'glow-soft g-cobalt':''}">
+      <div class="rp-head"><span class="rp-tag">AUTO CYCLE · 定时维保</span>
+        <span class="status-pill ${o.cyc?'sp-ok':'sp-warn'}">${o.cyc?'已开启':'未设置'}</span></div>
+      ${o.cyc ? `<div class="rp-main"><span class="data">${o.cyc.next.slice(5).replace('-','/')}</span><span class="rp-unit">· 下次 ${o.cyc.name}</span></div>
+        <div class="rp-biglabel">提前 ${o.cyc.lead} 天自动创建工单 · 到期自动派单至 ${o.tech||'待指派'}</div>`
+      : `<div class="rp-biglabel" style="margin-top:var(--s2)">未设置定时维保。设置后系统将在临近维保时自动创建工单并派单，无需人工排期。</div>`}
+      <button class="btn cta btn-block" style="margin-top:var(--s3)" data-page="d-cycle" data-arg="${i}">${icon('calendar',18)} ${o.cyc?'调整定时维保':'设置定时维保'}</button>
+    </div>` : ''}
+    ${skipped ? `
+    <div class="section-title stagger">跳过说明 <span class="st-count">已审核</span></div>
+    <div class="card pad stagger glow-soft g-ember">
+      <div class="rp-head"><span class="rp-tag">SKIPPED · 已跳过</span><span class="status-pill sp-stop">审核通过</span></div>
+      <div class="rp-biglabel" style="margin-top:var(--s2)">原因：${o.skip.reason}</div>
+      <div class="tl-s" style="margin-top:var(--s1); line-height:1.6">${o.skip.note}</div>
+      <div class="chips" style="margin-top:var(--s3)">
+        <span class="chip">${o.skip.photo}</span><span class="chip">说明已归档</span>
+      </div>
+    </div>` : ''}
+    ${!done && !skipped ? `
+    <div class="section-title stagger">其他操作</div>
+    <div class="card list-card stagger">
+      <div class="list-row" data-page="d-skip" data-arg="${i}"><div class="lr-ic">${icon('fileCopy',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">跳过本次维保</div><div class="lr-s">需上传图文说明 · 管理员审核后周期顺延</div></div>
+        <span class="lr-arrow">${icon('chevron',18,{rot:90})}</span></div>
+      ${listRow({ic:'phone',t:'联系业主',s:o.m + ' · 电话确认上门时间',val:'拨打'})}
+    </div>` : ''}
+    <div class="version stagger">工单 ${o.id} · 服务主体：弗朗茨原厂服务</div>
+  </div>`;
+}
+
+/* ---------- 管理员 · 设置定时维保 ---------- */
+function detailCycle(arg){
+  const i = +(arg||0), o = ORDERS[i] || ORDERS[0];
+  const cyc = o.cyc || { name:'季度保', next:'2027-02-06', lead:15, auto:true };
+  const d = new Date(cyc.next); d.setDate(d.getDate()-cyc.lead);
+  const leadDate = `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  const periods = ['半月保','季度保','半年保','年度自检'];
+  return `<div class="page">
+    ${dpHead('设置定时维保','已完成工单 ' + o.id + ' · ' + o.m)}
+    <div class="notice stagger">按周期自动创建工单：到期前自动建单、自动派单至原技师，业主与服务技师同步收到提醒。</div>
+    <div class="card stagger">
+      <div class="fld">
+        <div class="fld-l">维保周期</div>
+        <div class="chips" data-single>
+          ${periods.map(p=>`<span class="chip${p===cyc.name?' on':''}" data-radio>${p}</span>`).join('')}
+        </div>
+      </div>
+      <div class="fld">
+        <div class="fld-l">下次维保日期</div>
+        <input value="${cyc.next}" />
+      </div>
+      <div class="fld">
+        <div class="fld-l">提前多久自动建单</div>
+        <div class="chips" data-single>
+          ${[7,15,30].map(n=>`<span class="chip${n===cyc.lead?' on':''}" data-radio>提前 ${n} 天</span>`).join('')}
+        </div>
+      </div>
+      <div class="fld">
+        <div class="fld-l">自动派单给</div>
+        <input value="${o.tech || '张建国'}（原服务技师）" />
+      </div>
+      <div class="fld" style="border-bottom:none">
+        <div class="fld-l">自动化开关</div>
+        <div class="card list-card" style="margin-top:var(--s2); background:transparent; box-shadow:none; border:none">
+          <div class="list-row" style="padding-left:0; padding-right:0">
+            <div class="lr-ic">${icon('calendar',18)}</div>
+            <div style="flex:1;min-width:0"><div class="lr-t">到期自动创建工单</div><div class="lr-s">提前 ${cyc.lead} 天生成工单并派单</div></div>
+            <span class="tgl on" role="switch" aria-checked="true" aria-label="到期自动创建工单"></span></div>
+          <div class="list-row" style="padding-left:0; padding-right:0">
+            <div class="lr-ic">${icon('phone',18)}</div>
+            <div style="flex:1;min-width:0"><div class="lr-t">短信提醒业主</div><div class="lr-s">上门前 1 天发送预约确认</div></div>
+            <span class="tgl on" role="switch" aria-checked="true" aria-label="短信提醒业主"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="notice stagger">系统将于 ${leadDate} 自动创建「${cyc.name}」工单，并派单至 ${o.tech || '张建国'}。</div>
+    <button class="btn cta btn-block stagger" style="margin-top:var(--s3)" data-save="定时维保已保存">${icon('calendar',18)} 保存定时维保</button>
+    <div class="version stagger">原工单 ${o.id} 已闭环 · 后续按周期自动生成</div>
+  </div>`;
+}
+
+/* ---------- 管理员 · 跳过本次维保（需图文说明） ---------- */
+function detailSkip(arg){
+  const i = +(arg||0), o = ORDERS[i] || ORDERS[0];
+  return `<div class="page">
+    ${dpHead('跳过本次维保', o.t + ' · ' + o.m + ' · ' + o.id)}
+    <div class="notice stagger">跳过需上传现场图文说明并经管理员审核；通过后本次工单关闭，保养周期顺延至下一期，不会产生欠保记录。</div>
+    <div class="card stagger">
+      <div class="fld">
+        <div class="fld-l">跳过原因</div>
+        <div class="chips" data-single>
+          <span class="chip on" data-radio>业主长期外出</span>
+          <span class="chip" data-radio>房屋装修施工</span>
+          <span class="chip" data-radio>电梯暂停使用</span>
+          <span class="chip" data-radio>设备待改造</span>
+        </div>
+      </div>
+      <div class="fld" style="border-bottom:none">
+        <div class="fld-l">情况说明</div>
+        <textarea placeholder="例：业主 11 月中旬出境，家中无人接待，已电话确认顺延；电梯近 30 天运行 0 小时。"></textarea>
+      </div>
+    </div>
+    <div class="card pad stagger" style="margin-top:var(--s2)">
+      <div class="up" data-upload data-name="跳过现场照片_2张.jpg" role="button" tabindex="0">
+        ${icon('up',22)}
+        <div class="up-t">上传图文说明（必填）</div>
+        <div class="up-s">现场照片 / 业主沟通截图 · JPG / PNG · ≤ 10MB</div>
+        <div class="up-files"></div>
+      </div>
+    </div>
+    <button class="btn cta btn-block stagger" style="margin-top:var(--s3)" data-save="跳过申请已提交">${icon('fileCopy',18)} 提交跳过申请</button>
+    <div class="version stagger">提交后由总部运营审核，结果同步至业主与技师</div>
+  </div>`;
+}
+
+/* ---------- 业主 · 我的电梯 ---------- */
+function detailMember(){
+  return `<div class="page">
+    ${dpHead('我的电梯','上海佘山别墅 · 业主 · 陈晓')}
+    ${kpiCard([{to:1284,l:'累计安全运行 h'},{to:24,l:'累计维保次数'},{raw:'0',l:'未闭环报修'}],'g-cobalt')}
+    <div class="section-title stagger">设备信息</div>
+    <div class="card list-card stagger">
+      ${listRow({ic:'box',t:'曳引平台梯 FR-T',s:'设备代码 3110 7100 2013 0015'})}
+      ${listRow({ic:'calendar',t:'安装日期 2021.06.18',s:'整机质保至 2031.06.17'})}
+      ${listRow({ic:'shield',t:'额定载重 400kg · 3 层 3 站',s:'无机房 · 底坑 300mm'})}
+      ${listRow({ic:'wifi',t:'智慧物联已接入',s:'24h 在线监测 · 异常主动预警',val:'在线'})}
+    </div>
+    <div class="section-title stagger">实时运行</div>
+    <div class="card mini-stats stagger">
+      <div><div class="ms-n">0.4</div><div class="ms-l">轿厢振动 mm/s</div></div>
+      <div><div class="ms-n">3.2</div><div class="ms-l">门机电流 A</div></div>
+      <div><div class="ms-n">38</div><div class="ms-l">曳引温度 ℃</div></div>
+    </div>
+    <div class="section-title stagger">维保记录</div>
+    <div class="card tl-row stagger"><div class="tl-dot done"></div>
+      <div class="tl-main"><div class="tl-t">季度保 · 已完成</div><div class="tl-s">32 项作业全部合格 · <span class="who" data-page="d-tech">${icon('user',13)} 张建国</span></div></div><div class="tl-time">10/28</div></div>
+    <div class="card tl-row stagger"><div class="tl-dot done"></div>
+      <div class="tl-main"><div class="tl-t">半月保 · 已完成</div><div class="tl-s">18 项作业全部合格 · 张建国</div></div><div class="tl-time">10/12</div></div>
+    <div class="card tl-row stagger"><div class="tl-dot done"></div>
+      <div class="tl-main"><div class="tl-t">年度自检 · 已完成</div><div class="tl-s">TSG T5002-2017 归档</div></div><div class="tl-time">08/15</div></div>
+    <div class="section-title stagger">下次保养</div>
+    <div class="card pad glow-soft g-cobalt stagger">
+      <div class="rp-head"><span class="rp-tag">NEXT SERVICE · 下次保养</span><span class="status-pill sp-ok">已排期</span></div>
+      <div class="rp-main"><span class="data">12/15</span><span class="rp-unit">· 季度保</span></div>
+      <div class="rp-biglabel">预计上门 09:30 · 技师 <span class="who" data-page="d-tech">${icon('user',13)} 张建国</span></div>
+      <div class="rp-bar"><i style="width:72%"></i></div>
+      <div class="rp-barlabel"><span>距保养进度</span><span>72%</span></div>
+      <button class="btn cta btn-block" style="margin-top:var(--s3)">${icon('calendar',18)} 调整预约时间</button>
+    </div>
+    <div class="section-title stagger">延保与服务</div>
+    <div class="card list-card stagger">
+      ${listRow({ic:'receipt',t:'延保续费',s:'原厂延保 3 年 · ¥8,600',val:'可购买'})}
+      ${listRow({ic:'phone',t:'一键报修',s:'400-828-1876 · 24h 响应'})}
+      ${listRow({ic:'fileCopy',t:'使用与保养手册',s:'PDF · 3.2MB'})}
+    </div>
+  </div>`;
+}
+
+/* ---------- 技师详情（业主点击姓名进入） ---------- */
+function detailTech(){
+  const t = TECH;
+  return `<div class="page">
+    ${dpHead('服务技师','累计工单 486 · 服务家庭 312 · 评分 4.9')}
+    <div class="card pad stagger glow-soft g-cobalt">
+      <div class="tech-top">
+        <div class="tech-av">${t.name.slice(0,1)}</div>
+        <div class="tech-main">
+          <div class="tech-n">${t.name} <span class="status-pill sp-ok">在岗</span></div>
+          <div class="tech-o">${t.org} · 工号 ${t.id}</div>
+          <div class="tech-o">从业 ${t.years} · 服务上海佘山片区</div>
+        </div>
+      </div>
+      <div class="tech-stats">${t.stats.map(s=>`<div><div class="ts-n${String(s[0]).includes('.')?' dec':''}">${s[0]}</div><div class="ts-l">${s[1]}</div></div>`).join('')}</div>
+    </div>
+    <div class="section-title stagger">专业资质 <span class="st-count">3 项</span></div>
+    <div class="card list-card stagger">
+      ${t.certs.map(c=>`<div class="list-row"><div class="lr-ic">${icon('certificate',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">${c[0]}</div><div class="lr-s">${c[1]}</div></div>
+        <span class="status-pill ${c[2]}">${c[3]}</span></div>`).join('')}
+    </div>
+    <div class="section-title stagger">为我服务记录</div>
+    <div class="card tl-row stagger"><div class="tl-dot done"></div>
+      <div class="tl-main"><div class="tl-t">季度保 · 已完成</div><div class="tl-s">32 项作业全部合格</div></div><div class="tl-time">10/28</div></div>
+    <div class="card tl-row stagger"><div class="tl-dot done"></div>
+      <div class="tl-main"><div class="tl-t">半月保 · 已完成</div><div class="tl-s">18 项作业全部合格</div></div><div class="tl-time">10/12</div></div>
+    <div class="card tl-row stagger"><div class="tl-dot done"></div>
+      <div class="tl-main"><div class="tl-t">年度自检 · 已完成</div><div class="tl-s">TSG T5002-2017 归档</div></div><div class="tl-time">08/15</div></div>
+    <div class="notice stagger">下次上门 12/15 09:30 季度保；如需调整时间可在「我的电梯」中重新预约。</div>
+    <button class="btn cta btn-block stagger" style="margin-top:var(--s3)">${icon('phone',18)} 联系技师</button>
+  </div>`;
+}
+
+/* ---------- 资质证书（维保人员上传） ---------- */
+function detailCert(){
+  return `<div class="page">
+    ${dpHead('我的证书','上海安装队 · 技师 · 张建国')}
+    <div class="notice stagger">证书需为有效期内的清晰扫描件或照片，支持 JPG / PDF，单个不超过 10MB；提交后由总部运营在 1 个工作日内完成核验。</div>
+    <div class="card pad stagger">
+      <div class="up" data-upload data-name="高处作业证_20261101.pdf" role="button" tabindex="0">
+        ${icon('up',22)}
+        <div class="up-t">上传专业证书</div>
+        <div class="up-s">点击选择文件 · JPG / PDF · ≤ 10MB</div>
+        <div class="up-files"></div>
+      </div>
+    </div>
+    <div class="section-title stagger">已持证照 <span class="st-count">3 项</span></div>
+    ${TECH.certs.map(c=>`<div class="card task-col stagger">
+      <div class="task-top"><div class="tk-time">${icon('certificate',20)}</div>
+        <div class="tk-main"><div class="tk-t">${c[0]}</div><div class="tk-s">${c[1]}</div>
+          <div class="tk-tags"><span class="status-pill ${c[2]}">${c[3]}</span><span class="chip">已核验</span></div></div></div>
+    </div>`).join('')}
+    <div class="section-title stagger">上传记录</div>
+    <div class="card tl-row stagger"><div class="tl-dot"></div>
+      <div class="tl-main"><div class="tl-t">高处作业操作证 · 审核中</div><div class="tl-s">10/28 上传 · 预计 11/02 前出结果</div></div><div class="tl-time">10/28</div></div>
+    <div class="card tl-row stagger"><div class="tl-dot done"></div>
+      <div class="tl-main"><div class="tl-t">低压电工作业证 · 已通过</div><div class="tl-s">核验人：王敏 · 已归档至人员档案</div></div><div class="tl-time">09/16</div></div>
+    <button class="btn cta btn-block stagger" style="margin-top:var(--s3)" data-save="已提交审核">${icon('up',18)} 提交核验</button>
+  </div>`;
+}
+
+/* ---------- 业务员 · 会员（客户）详情 ---------- */
+function detailClient(arg){
+  const i = +(arg||0), c = CLIENTS[i] || CLIENTS[0];
+  const amt = c.amount.replace('¥','').replace('万','');
+  return `<div class="page">
+    ${dpHead(c.key + ' · 会员详情', c.city + ' ' + c.addr)}
+    <div class="card pad stagger glow-soft g-plum">
+      <div class="tech-top">
+        <div class="tech-av">${c.key.slice(0,1)}</div>
+        <div class="tech-main">
+          <div class="tech-n">${c.key} <span class="status-pill sp-run">${c.stage}</span></div>
+          <div class="tech-o">${c.phone}</div>
+          <div class="tech-o">${c.model} · 签约 ${c.sign}</div>
+        </div>
+      </div>
+      <div class="tech-stats">
+        <div><div class="ts-n${amt.includes('.')?' dec':''}">${amt}</div><div class="ts-l">合同金额（万）</div></div>
+        <div><div class="ts-n">${c.svc.length}</div><div class="ts-l">售后记录</div></div>
+        <div><div class="ts-n">${i===0?'24':'12'}</div><div class="ts-l">服务月数</div></div>
+      </div>
+    </div>
+    <div class="section-title stagger">归属关系</div>
+    <div class="card own-card glow-soft ${c.owner?'g-cobalt':'g-ember'} stagger">
+      <div class="own-top">
+        <span class="own-lbl">专属业务员</span>
+        ${c.owner?`<span class="own-name">${c.owner}</span><span class="chip on">${c.source}</span>`
+                 :`<span class="own-name">尚未分配</span><span class="status-pill sp-warn">待指派</span>`}
+      </div>
+      <div class="own-note">${c.owner
+        ? `${c.since} 开始归属 ${c.owner}${c.code2?`（邀请码 ${c.code2}）`:''} · 业绩与佣金计入该业务员名下`
+        : `${c.since} 通过${c.source}注册，尚未指派归属业务员，需由管理员在「会员分配」中指派。`}</div>
+    </div>
+    <div class="section-title stagger">设备与合同</div>
+    <div class="card list-card stagger">
+      ${listRow({ic:'box',t:c.model,s:'设备代码 ' + c.code})}
+      ${listRow({ic:'calendar',t:'签约日期 ' + c.sign,s:'整机质保 10 年 · 含年检代办'})}
+      ${listRow({ic:'receipt',t:'合同金额 ' + c.amount,s:'首笔回款已完成 · 尾款待结'})}
+    </div>
+    <div class="section-title stagger">维保记录 <span class="st-count">${(c.mnt||[]).length} 次服务</span></div>
+    ${(c.mnt||[]).length
+      ? (c.mnt||[]).map((v,j)=>`<div class="card tl-row stagger"><div class="tl-dot${j>0?' done':''}"></div>
+          <div class="tl-main"><div class="tl-t">${v[1]}</div>
+            <div class="tl-s">${v[3]} · 技师 <span class="who" data-page="d-tech">${icon('user',13)} ${v[2]}</span></div></div>
+          <div style="text-align:right"><div class="tl-time">${v[0].slice(5)}</div>
+            <div style="margin-top:var(--s1)"><span class="status-pill ${v[4]}">${v[3]==='全部合格'?'合格':v[3]}</span></div></div></div>`).join('')
+      : `<div class="card pad stagger"><div class="notice" style="margin:0; padding:0">尚未产生维保记录 · ${
+          c.stage==='已注册'?'完成签约并安装后将自动建档':'设备交付后首次例保推送到服务商'}</div></div>`}
+    <div class="section-title stagger">维保售后记录</div>
+    ${c.svc.map((s,j)=>`<div class="card tl-row stagger"><div class="tl-dot${j>0?' done':''}"></div>
+      <div class="tl-main"><div class="tl-t">${s[0]}</div><div class="tl-s">${s[1]}</div></div>
+      <div class="tl-time">2026</div></div>`).join('')}
+    <div class="notice stagger">代写内容将同步至会员本人与服务技师，会员端会显示「由业务员 李航 代提交」</div>
+    <button class="btn cta btn-block stagger" style="margin-top:var(--s3)" data-page="d-write" data-arg="${i}">${icon('pen',18)} 代写维保售后信息</button>
+    <button class="btn ghost btn-block stagger" style="margin-top:var(--s2)" data-page="d-edit" data-arg="${i}">${icon('user',18)} 编辑会员基本信息</button>
+    <div class="version stagger">会员 ID · FR-M-20${i+1}03</div>
+  </div>`;
+}
+
+/* ---------- 业务员 · 代写维保售后信息 ---------- */
+function detailWrite(arg){
+  const i = +(arg||0), c = CLIENTS[i] || CLIENTS[0];
+  return `<div class="page">
+    ${dpHead('代写维保售后信息','代 ' + c.key + ' 提交 · 业务员 李航')}
+    <div class="notice stagger">请据实填写，提交后将进入会员的售后档案并同步派单至服务技师。</div>
+    <div class="card stagger">
+      <div class="fld">
+        <div class="fld-l">服务类型</div>
+        <div class="chips">
+          <span class="chip on" data-toggle>故障报修</span>
+          <span class="chip" data-toggle>保养预约</span>
+          <span class="chip" data-toggle>配件更换</span>
+          <span class="chip" data-toggle>延保咨询</span>
+        </div>
+      </div>
+      <div class="fld">
+        <div class="fld-l">问题描述</div>
+        <textarea placeholder="例：轿厢运行中门机有异响，随行iPhone素材 2 段，已初步复位仍偶发。"></textarea>
+      </div>
+      <div class="fld">
+        <div class="fld-l">期望上门时间</div>
+        <input value="2026-11-03 09:30" />
+      </div>
+      <div class="fld">
+        <div class="fld-l">现场联系人</div>
+        <input value="${c.key} ${c.phone}" />
+      </div>
+      <div class="fld">
+        <div class="fld-l">补充说明</div>
+        <input placeholder="可留空，如门禁密码、宠物注意事项等" />
+      </div>
+    </div>
+    <div class="card pad stagger" style="margin-top:var(--s2)">
+      <div class="up" data-upload data-name="现场录音与照片.zip" role="button" tabindex="0">
+        ${icon('up',22)}
+        <div class="up-t">上传现场照片 / 视频</div>
+        <div class="up-s">可多选 · JPG / MP4 · ≤ 20MB</div>
+        <div class="up-files"></div>
+      </div>
+    </div>
+    <button class="btn cta btn-block stagger" style="margin-top:var(--s3)" data-save="已代会员提交">${icon('pen',18)} 提交售后申请</button>
+    <div class="version stagger">提交后不可撤回，需联系管理员修改</div>
+  </div>`;
+}
+
+/* ---------- 业务员 · 编辑会员基本信息 ---------- */
+function detailEdit(arg){
+  const i = +(arg||0), c = CLIENTS[i] || CLIENTS[0];
+  return `<div class="page">
+    ${dpHead('编辑会员基本信息','会员 ' + c.key + ' · 业务员 李航')}
+    <div class="notice stagger">手机号变更需短信验证，地址变更将同步至维保派单与年检档案。</div>
+    <div class="card stagger">
+      <div class="fld"><div class="fld-l">会员姓名</div><input value="${c.key}" /></div>
+      <div class="fld"><div class="fld-l">手机号</div><input value="${c.phone}" /></div>
+      <div class="fld"><div class="fld-l">所在城市</div><input value="${c.city}" /></div>
+      <div class="fld"><div class="fld-l">详细地址</div><input value="${c.addr}" /></div>
+      <div class="fld"><div class="fld-l">电梯型号</div><input value="${c.model}" /></div>
+      <div class="fld"><div class="fld-l">家庭成员联系人</div><input placeholder="可留空，用于紧急联系" /></div>
+      <div class="fld"><div class="fld-l">内部备注</div><textarea placeholder="例：业主偏好周末上门，需提前一天电话确认。"></textarea></div>
+    </div>
+    <button class="btn cta btn-block stagger" style="margin-top:var(--s3)" data-save="已保存会员资料">${icon('pen',18)} 保存修改</button>
+    <div class="version stagger">最近由 李航 编辑 · 2026-10-28</div>
+  </div>`;
+}
+
+/* ---------- 管理员 · 会员权限设置 ---------- */
+function detailPerm(arg){
+  const i = +(arg||0), m = MEMBER_PERMS[i] || MEMBER_PERMS[0];
+  return `<div class="page">
+    ${dpHead('会员权限设置','品牌总部 · 运营 · 王敏')}
+    <div class="section-title stagger">选择会员 <span class="st-count">4 位</span></div>
+    <div class="card list-card stagger">
+      ${MEMBER_PERMS.map((x,j)=>`<div class="rnk-row" data-perm="${j}">
+        <div class="rnk-n${j===i?' top':''}">${j+1}</div>
+        <div class="rnk-main"><div class="rnk-t">${x.name} · ${x.role}</div><div class="rnk-s">${x.org} · ${x.model}</div></div>
+        <span class="rnk-v">${x.perms.filter(p=>p[2]).length} / ${x.perms.length}</span></div>`).join('')}
+    </div>
+    <div class="section-title stagger">${m.name} 的功能权限</div>
+    <div class="card list-card stagger">
+      ${m.perms.map(p=>`<div class="list-row"><div class="lr-ic">${icon(p[0]==='export'?'fileCopy':(p[0]==='bill'?'receipt':(p[0]==='sub'?'userGroup':'keyIcon')),18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">${p[1]}</div><div class="lr-s">${p[2]?'已开启':'已关闭'}</div></div>
+        <span class="tgl ${p[2]?'on':''}" role="switch" aria-checked="${p[2]?'true':'false'}" aria-label="${p[1]}"></span></div>`).join('')}
+    </div>
+    <div class="notice stagger">权限变更即时生效并记录操作日志；关闭「查看运行数据」后会员端将不再显示实时运行值与告警。</div>
+    <button class="btn cta btn-block stagger" style="margin-top:var(--s3)" data-save="权限已保存">${icon('keyIcon',18)} 保存权限设置</button>
+    <div class="version stagger">会员 ID · FR-M-20${i+1}03 · 最近操作 2026-10-30 由 王敏 变更</div>
+  </div>`;
+}
+
+/* ---------- 业主 · 维保预约 ---------- */
+function detailBooking(){
+  return `<div class="page">
+    ${dpHead('维保预约','FR-T 曳引平台梯 · 业主 陈晓')}
+    <div class="card pad glow-soft g-cobalt stagger">
+      <div class="rp-head"><span class="rp-tag">NEXT SERVICE</span><span class="status-pill sp-run">44 天后</span></div>
+      <div class="rp-main"><span class="data">12 / 15</span></div>
+      <div class="rp-biglabel">下次例行保养 · 季度保（32 项作业）</div>
+      <div class="rp-bar"><i style="width:72%"></i></div>
+      <div class="rp-barlabel"><span>距上次保养进度</span><span>72%</span></div>
+    </div>
+    <div class="section-title stagger">保养类型</div>
+    <div class="card stagger">
+      <div class="fld">
+        <div class="chips">
+          <span class="chip on" data-toggle>季度保</span>
+          <span class="chip" data-toggle>半月保</span>
+          <span class="chip" data-toggle>半年保</span>
+          <span class="chip" data-toggle>年度自检</span>
+        </div>
+      </div>
+      <div class="fld">
+        <div class="fld-l">预约日期</div>
+        <input value="2026-11-15" />
+      </div>
+      <div class="fld">
+        <div class="fld-l">上门时段</div>
+        <div class="chips">
+          <span class="chip on" data-toggle>09:00–11:00</span>
+          <span class="chip" data-toggle>13:00–15:00</span>
+          <span class="chip" data-toggle>15:00–17:00</span>
+        </div>
+      </div>
+      <div class="fld">
+        <div class="fld-l">现场联系人</div>
+        <input value="陈晓 138 0172 4488" />
+      </div>
+      <div class="fld" style="border-bottom:none">
+        <div class="fld-l">备注</div>
+        <input placeholder="如门禁密码、家中有宠物等" />
+      </div>
+    </div>
+    <button class="btn cta btn-block stagger" style="margin-top:var(--s3)" data-save="预约已提交">${icon('calendar',18)} 提交预约</button>
+    <div class="notice stagger" style="margin-top:var(--s3)">提交后由管家统筹排期，技师到场前 30 分钟会电话确认；如需改期请提前 24 小时操作。</div>
+    <div class="section-title stagger">历史预约</div>
+    <div class="card list-card stagger">
+      ${listRow({ic:'checkCircle',t:'季度保 · 已完成',s:'10/28 · 技师 张建国 · 32 项合格',val:'已完成'})}
+      ${listRow({ic:'checkCircle',t:'半月保 · 已完成',s:'10/12 · 技师 徐磊 · 18 项合格',val:'已完成'})}
+      ${listRow({ic:'checkCircle',t:'半年保 · 已完成',s:'2026.08.16 · 含限速器校验',val:'已完成'})}
+    </div>
+  </div>`;
+}
+
+/* ---------- 业主 · 报修进度 ---------- */
+function detailRepair(){
+  return `<div class="page">
+    ${dpHead('报修进度','工单 FR-24102831 · FR-T 曳引平台梯')}
+    <div class="card pad glow-soft g-ember stagger">
+      <div class="rp-head"><span class="rp-tag">IN PROGRESS</span><span class="status-pill sp-run">技师已出发</span></div>
+      <div class="rp-main"><span class="data">28</span><span class="rp-unit">min</span></div>
+      <div class="rp-biglabel">预计到达 10:05 · 已响应 12 分钟</div>
+      <div class="rp-bar"><i style="width:60%"></i></div>
+      <div class="rp-barlabel"><span>处理进度</span><span>60%</span></div>
+    </div>
+    <div class="section-title stagger">处理动态</div>
+    <div class="card list-card stagger">
+      <div class="card tl-row"><div class="tl-dot done"></div>
+        <div class="tl-main"><div class="tl-t">已提交报修</div><div class="tl-s">门机运行偶发异响 · 已附 2 段录音</div></div><div class="tl-time">09:18</div></div>
+      <div class="card tl-row"><div class="tl-dot done"></div>
+        <div class="tl-main"><div class="tl-t">客服已受理</div><div class="tl-s">判定为二级故障 · 2 小时内上门</div></div><div class="tl-time">09:22</div></div>
+      <div class="card tl-row"><div class="tl-dot done"></div>
+        <div class="tl-main"><div class="tl-t">技师已出发</div><div class="tl-s">${
+          `<span class="who" data-page="d-tech">${icon('user',13)} 张建国</span>`} · 沪 A·7Z42J</div></div><div class="tl-time">09:37</div></div>
+      <div class="card tl-row"><div class="tl-dot"></div>
+        <div class="tl-main"><div class="tl-t">到场检修</div><div class="tl-s">预计 10:05 · 预计更换门机皮带</div></div><div class="tl-time">待进行</div></div>
+      <div class="card tl-row"><div class="tl-dot"></div>
+        <div class="tl-main"><div class="tl-t">完成与回访</div><div class="tl-s">需业主确认后关闭工单</div></div><div class="tl-time">待进行</div></div>
+    </div>
+    <div class="section-title stagger">故障描述</div>
+    <div class="card pad stagger">
+      <div class="notice" style="margin:0; padding:0">轿厢上行至 2 层时门机有轻微异响，随附 2 段现场录音；断电复位后仍偶发，不影响正常运行。</div>
+    </div>
+    <div class="card pad stagger" style="margin-top:var(--s2)">
+      <div class="up" data-upload data-name="门机异响录音.m4a" role="button" tabindex="0">
+        ${icon('up',22)}
+        <div class="up-t">补充现场照片 / 视频</div>
+        <div class="up-s">可多选 · JPG / MP4 · ≤ 20MB</div>
+        <div class="up-files"></div>
+      </div>
+    </div>
+    <button class="btn ghost btn-block stagger" style="margin-top:var(--s3)">${icon('phone',18)} 联系技师</button>
+  </div>`;
+}
+
+function planCard(o){
+  return `<div class="card task-col plan stagger">
+    <div class="task-top">
+      <div class="tk-main">
+        <div class="tk-t">${o.t}${o.hot?`<span class="status-pill sp-ok" style="margin-left:var(--s2)">${o.hot}</span>`:''}</div>
+        <div class="tk-s">${o.s}</div>
+        <div class="plan-price">${o.price}<span class="u">起</span></div>
+      </div>
+    </div>
+    <div class="tk-foot end"><button class="tk-btn ${o.solid?'solid':''}">选择此套餐</button></div>
+  </div>`;
+}
+/* ---------- 业主 · 延保续费 ---------- */
+function detailWarranty(){
+  return `<div class="page">
+    ${dpHead('延保续费','FR-T 曳引平台梯 · 原厂质保至 2031.06')}
+    ${kpiCard([{raw:'4.8',unit:'年',l:'剩余质保'},{raw:'10',unit:'年',l:'整机质保'},{to:24,l:'已享保养次数'}],'g-cobalt')}
+    <div class="notice stagger">整机 10 年质保期内保养免费；延保包可在此基础上继续锁定原厂配件与人工，最长可延至 15 年。</div>
+    <div class="section-title stagger">延保套餐 <span class="st-count">3 档可选</span></div>
+    ${planCard({t:'基础延保 · 2 年',s:'含年度自检 + 限速器校验 1 次 · 到期 2033.06',price:'¥3,800'})}
+    ${planCard({t:'尊享延保 · 3 年',s:'含全部保养耗材 · 优先派单 · 到期 2034.06',price:'¥7,200',hot:'推荐',solid:1})}
+    ${planCard({t:'管家延保 · 5 年',s:'专属管家 · 24h 响应 · 物联监测 · 到期 2036.06',price:'¥12,600'})}
+    <div class="section-title stagger">权益对比</div>
+    <div class="card list-card stagger">
+      ${listRow({ic:'tools',t:'例行保养人工',s:'三个套餐均包含',val:'全含'})}
+      ${listRow({ic:'box',t:'易损件与耗材',s:'仅尊享 / 管家包含',val:'部分'})}
+      ${listRow({ic:'phone',t:'24 小时急修响应',s:'仅管家包含',val:'管家'})}
+      ${listRow({ic:'wifi',t:'物联远程监测',s:'仅管家包含',val:'管家'})}
+    </div>
+    <button class="btn cta btn-block stagger" style="margin-top:var(--s3)" data-save="已提交延保申请">${icon('receipt',18)} 立即办理延保</button>
+    <div class="version stagger">费用由管家核算后生成订单，可分期免息</div>
+  </div>`;
+}
+
+/* ---------- 业务员 · 我的客户 ---------- */
+function detailClients(){
+  return `<div class="page">
+    ${dpHead('我的客户','华东大区 · 业务员 李航')}
+    ${segTabs(['全部','跟进中','已签约','已成交'],0)}
+    ${kpiCard([{to:4,l:'在跟客户'},{to:68.9,dec:1,unit:'万',l:'在跟金额'},{to:2,l:'本月成交'}],'g-plum')}
+    <div class="search stagger">${icon('search',16)} 客户姓名 / 小区 / 设备型号</div>
+    <div class="card list-card stagger">
+      ${myClients().map(o=>`<div class="list-row" data-page="d-client" data-arg="${o.i}"><div class="lr-ic">${icon('user',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">${o.c.key} · ${o.c.addr}</div><div class="lr-s">${o.c.model} · ${o.c.stage}</div></div>
+        <span class="lr-val">${o.c.amount}</span><span class="lr-arrow">${icon('chevron',18,{rot:-90})}</span></div>`).join('')}
+    </div>
+    <div class="section-title stagger">本周待跟进 <span class="st-count">2 项</span></div>
+    ${taskCard({time:'周一',t:'李岚 · 方案报价跟进',s:'苏州园区独栋 · 报价已出 3 天',pill:'待跟进',pillCls:'sp-warn',chip:'¥15.8万',action:['去跟进',1]})}
+    ${taskCard({time:'周三',t:'何婧 · 首次量尺',s:'合肥华润润府 · 需预约上门',pill:'待量尺',pillCls:'sp-run',chip:'¥12.2万',action:['预约量尺']})}
+  </div>`;
+}
+
+/* ---------- 业务员 · 推广码 ---------- */
+function detailPromo(){
+  return `<div class="page">
+    ${dpHead('专属推广码','业务员 李航 · 工号 FRL-8H42')}
+    <div class="card pad stagger" style="text-align:center">
+      <div class="rp-tag" style="display:inline-block; margin-bottom:var(--s3)">QR CODE</div>
+      <div style="display:flex; justify-content:center; padding:var(--s3) 0">${qrSvg(132)}</div>
+      <div class="rp-title" style="margin-top:var(--s2)">邀请码 FRL-8H42</div>
+      <div class="rp-biglabel">业主扫码注册后自动绑定为你名下客户</div>
+      <button class="btn ghost btn-block stagger" style="margin-top:var(--s3)" data-copy>${icon('copy',18)} 复制邀请码</button>
+    </div>
+    ${kpiCard([{to:328,l:'扫码次数'},{to:46,l:'注册客户'},{to:17.4,dec:1,unit:'%',l:'转化率'}],'g-plum')}
+    <div class="section-title stagger">推广物料</div>
+    <div class="card list-card stagger">
+      ${listRow({ic:'fileCopy',t:'品牌电子手册',s:'PDF · 12.4MB · 含全部型号',val:'分享'})}
+      ${listRow({ic:'play',t:'别墅电梯选型视频',s:'MP4 · 90 秒 · 含安装实景',val:'分享'})}
+      ${listRow({ic:'trophy',t:'TÜV 认证合集',s:'图片 · 德国莱茵认证文件',val:'分享'})}
+      ${listRow({ic:'receipt',t:'报价单模板',s:'XLSX · 支持自动算价',val:'分享'})}
+    </div>
+    <div class="section-title stagger">扫码转化明细 <span class="st-count">近 4 位</span></div>
+    <div class="card list-card stagger">
+      ${rnk({n:1,top:1,t:'王珮 · 已成交',s:'10/28 扫码 · 12 天转化',v:'¥18.6万'})}
+      ${rnk({n:2,t:'周振 · 已签约',s:'10/15 扫码 · 9 天转化',v:'¥22.4万'})}
+      ${rnk({n:3,t:'李岚 · 已量尺',s:'10/22 扫码 · 跟进中',v:'¥15.8万'})}
+      ${rnk({n:4,t:'何婧 · 待跟进',s:'10/29 扫码 · 待量尺',v:'¥12.2万'})}
+    </div>
+    <button class="btn cta btn-block stagger" style="margin-top:var(--s3)">${icon('share',18)} 分享给客户</button>
+  </div>`;
+}
+
+/* ---------- 业务员 · 佣金明细 ---------- */
+function detailCommission(){
+  const rows = [
+    ['王珮 · FR-S 螺杆家梯','¥18.6万','3.2%','¥5,952','已发放'],
+    ['周振 · FR-P 观光玻璃梯','¥22.4万','3.5%','¥7,840','已发放'],
+    ['李岚 · FR-T 曳引平台梯','¥15.8万','2.8%','¥4,424','待结算'],
+    ['旧梯焕新 · 无锡金域','¥8.2万','2.0%','¥1,640','待结算']
+  ];
+  return `<div class="page">
+    ${dpHead('佣金明细','2026 年 10 月 · 华东大区')}
+    ${kpiCard([{raw:'2.4',unit:'万',l:'本月计提'},{raw:'1.8',unit:'万',l:'已发放'},{raw:'0.6',unit:'万',l:'待结算'}],'g-plum')}
+    <div class="notice stagger">佣金于客户全款到账次月起分 2 期发放，尾款随验收合格后结清。</div>
+    <div class="section-title stagger">本期明细 <span class="st-count">4 笔</span></div>
+    <div class="card list-card stagger">
+      ${rows.map(r=>`<div class="list-row"><div class="lr-ic">${icon('money',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">${r[0]}</div><div class="lr-s">签约额 ${r[1]} · 提成比例 ${r[2]}</div></div>
+        <span class="lr-val">${r[3]}</span>${r[4]==='已发放'
+          ? `<span class="chip">已发放</span>` : `<span class="chip on">待结算</span>`}</div>`).join('')}
+    </div>
+    <div class="section-title stagger">发放记录</div>
+    <div class="card list-card stagger">
+      ${listRow({ic:'checkCircle',t:'2026/10/15 · 第一期',s:'网银代发 · 尾号 8842',val:'¥9,560'})}
+      ${listRow({ic:'checkCircle',t:'2026/09/15 · 第一期',s:'网银代发 · 尾号 8842',val:'¥7,180'})}
+      ${listRow({ic:'checkCircle',t:'2026/08/15 · 第一期',s:'网银代发 · 尾号 8842',val:'¥6,240'})}
+    </div>
+    <button class="btn ghost btn-block stagger" style="margin-top:var(--s3)">${icon('receipt',18)} 申请开票</button>
+  </div>`;
+}
+
+/* ---------- 安装维保 · 作业记录 ---------- */
+function detailRecords(){
+  const rows = [
+    ['11/01','季度保 · FR-T 曳引平台梯','FR-24110107','苏州园区 · 李宅','32 项合格','sp-ok'],
+    ['10/30','旧梯焕新勘测 · FR-R','FR-24103012','无锡金域 · 出具焕新方案','勘测完成','sp-ok'],
+    ['10/29','半月保 · FR-T','FR-24102903','常熟体验中心 · 18 项','全部合格','sp-ok'],
+    ['10/28','竣工验收 · FR-S 螺杆家梯','FR-24102809','上海佘山 · 王宅 G17','已待确认','sp-warn'],
+    ['10/26','紧急抢修 · 门机异响','FR-24102621','上海佘山 · 王宅 G17','已闭环','sp-ok']
+  ];
+  return `<div class="page">
+    ${dpHead('作业记录','技师 张建国 · 上海安装队')}
+    ${segTabs(['本月','近三月','本年'],0)}
+    ${kpiCard([{to:46,l:'本月工单'},{raw:'42',unit:'min',l:'平均作业时长'},{raw:'96',unit:'%',l:'一次通过率'}],'g-ember')}
+    <div class="notice stagger">作业记录同步写入设备电子档案，业主可在「我的电梯」中查看完整服务历史。</div>
+    <div class="section-title stagger">作业清单 <span class="st-count">5 条</span></div>
+    <div class="card list-card stagger">
+      ${rows.map(r=>`<div class="list-row"><div class="lr-ic">${icon('fileCopy',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">${r[1]}</div><div class="lr-s">${r[0]} · ${r[3]} · ${r[2]}</div></div>
+        <span class="status-pill ${r[5]}">${r[4]}</span></div>`).join('')}
+    </div>
+    <div class="section-title stagger">本月工时</div>
+    <div class="card mini-stats stagger">
+      <div><div class="ms-n">168</div><div class="ms-l">总工时 h</div></div>
+      <div><div class="ms-n">21</div><div class="ms-l">出勤天</div></div>
+      <div><div class="ms-n">8.0</div><div class="ms-l">日均 h</div></div>
+    </div>
+  </div>`;
+}
+
+/* ---------- 安装维保 · 备件申领（原「考勤打卡」位） ---------- */
+function detailParts(){
+  return `<div class="page">
+    ${dpHead('备件申领','技师 张建国 · 上海安装队')}
+    ${kpiCard([{raw:'12',unit:'件',l:'随车在库'},{raw:'2',unit:'单',l:'待领申请'},{to:8,l:'本月消耗'}],'g-ember')}
+    <div class="section-title stagger">新增申领</div>
+    <div class="card stagger">
+      <div class="fld">
+        <div class="fld-l">备件类型</div>
+        <div class="chips">
+          <span class="chip on" data-toggle>门机皮带</span>
+          <span class="chip" data-toggle>导靴衬</span>
+          <span class="chip" data-toggle>限速器钢丝绳</span>
+          <span class="chip" data-toggle>接触器</span>
+          <span class="chip" data-toggle>缓冲器油</span>
+        </div>
+      </div>
+      <div class="fld">
+        <div class="fld-l">申领数量</div>
+        <input value="2" />
+      </div>
+      <div class="fld">
+        <div class="fld-l">关联工单</div>
+        <input value="FR-24110107 · 苏州园区 · 李宅" />
+      </div>
+      <div class="fld" style="border-bottom:none">
+        <div class="fld-l">用途说明</div>
+        <textarea placeholder="例：季度保中发现皮带磨损超标，需更换以保证门机运行平稳。"></textarea>
+      </div>
+    </div>
+    <div class="card pad stagger" style="margin-top:var(--s2)">
+      <div class="up" data-upload data-name="旧件拆除照片_2张.jpg" role="button" tabindex="0">
+        ${icon('up',22)}
+        <div class="up-t">上传旧件照片</div>
+        <div class="up-s">领用需附拆除旧件照片 · JPG · ≤ 10MB</div>
+        <div class="up-files"></div>
+      </div>
+    </div>
+    <button class="btn cta btn-block stagger" style="margin-top:var(--s3)" data-save="申领已提交">${icon('box',18)} 提交申领</button>
+    <div class="notice stagger">单次申领 ≤ 3 件由队长线上审批；超量或单价 &gt; ¥2,000 需仓储主管复核。</div>
+    <div class="section-title stagger">申领记录</div>
+    <div class="card list-card stagger">
+      ${listRow({ic:'box',t:'导靴衬 × 4',s:'FR-24102621 · 10/26 · 队长已批',val:'已领用'})}
+      ${listRow({ic:'box',t:'接触器 × 1',s:'FR-24101904 · 10/19 · 已回收旧件',val:'已领用'})}
+      ${listRow({ic:'box',t:'缓冲器油 × 2',s:'FR-24101408 · 10/14 · 审批中',val:'待审批'})}
+    </div>
+  </div>`;
+}
+
+/* ---------- 管理员 · 门店查询（只读） ---------- */
+function detailStores(){
+  return `<div class="page">
+    ${dpHead('门店查询','仅提供查询 · 不可编辑')}
+    <div class="notice stagger">门店与体验中心档案由品牌总部统一维护，本页面为只读视图。如需变更请提交运营工单。</div>
+    <div class="search stagger">${icon('search',16)} 门店名称 / 城市 / 负责人</div>
+    <div class="card mini-stats stagger">
+      <div><div class="ms-n">1</div><div class="ms-l">体验中心</div></div>
+      <div><div class="ms-n">36</div><div class="ms-l">服务网点</div></div>
+      <div><div class="ms-n">4</div><div class="ms-l">在营门店</div></div>
+    </div>
+    <div class="section-title stagger">体验中心 <span class="st-count">1 家</span></div>
+    <a class="card store-card stagger" href="${AMAP_URL}" target="_blank" rel="noopener"
+       title="${STORE_NAME}｜${STORE_ADDR}｜点击在高德地图中查看">
+      <div class="sc-ic">${icon('location',20)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="sc-name">${STORE_NAME}</div>
+        <div class="sc-addr" title="${STORE_ADDR}">${STORE_ADDR}</div>
+      </div>
+      <div class="sc-go">${icon('navigation',18)}</div>
+    </a>
+    <div class="card list-card stagger" style="margin-top:var(--s2)">
+      ${listRow({ic:'phone',t:'门店电话',s:'0512 5288 1616',val:'可拨打'})}
+      ${listRow({ic:'clock',t:'营业时间',s:'周一至周日 09:00–18:00',val:'全年无休'})}
+      ${listRow({ic:'user',t:'门店负责人',s:'陈立 · 体验中心店长',val:'在岗'})}
+      ${listRow({ic:'elevator',t:'展厅在展机型',s:'FR-T / FR-S / FR-P / FR-H',val:'4 台'})}
+    </div>
+    <div class="version stagger">以上信息与高德地图同步更新</div>
+  </div>`;
+}
+
+/* ---------- 管理员 · 待办审核 ---------- */
+function detailApprove(){
+  return `<div class="page">
+    ${dpHead('待办审核','品牌总部 · 运营 王敏')}
+    ${segTabs(['待审核','已通过','已驳回'],0)}
+    ${kpiCard([{to:6,l:'待我审核'},{to:11,l:'今日已办'},{raw:'2.4',unit:'h',l:'平均处理时长'}],'g-cobalt')}
+    <div class="section-title stagger">待审核 <span class="st-count">6 项</span></div>
+    ${taskCard({time:'09:12',t:'年报抽查 · 常熟体验中心',s:'抽查 32 项 · 提交人：王敏',pill:'待审核',pillCls:'sp-warn',chip:'SPOT-2411-03',actions:[['通过'],['驳回','reject']]})}
+    ${taskCard({time:'10:05',t:'延保续费工单 · 佘山王宅',s:'业主申请延保 3 年 · 业务员：李航',pill:'待审核',pillCls:'sp-warn',chip:'WO-2411-014',actions:[['通过'],['驳回','reject']]})}
+    ${taskCard({time:'11:20',t:'业务员权限变更 · 周涛',s:'申请开通华东大区全量查询',pill:'待审核',pillCls:'sp-warn',chip:'AUTH-2411-06',actions:[['通过'],['驳回','reject']]})}
+    ${taskCard({time:'13:40',t:'备件申领 · 缓冲器油 × 2',s:'技师 张建国 · 单价 ¥180',pill:'待审核',pillCls:'sp-warn',chip:'PART-2411-11',actions:[['通过'],['驳回','reject']]})}
+    ${taskCard({time:'15:05',t:'技师资质更新 · 徐磊',s:'低压电工证换证已上传待核验',pill:'待审核',pillCls:'sp-warn',chip:'CERT-2411-02',actions:[['通过'],['驳回','reject']]})}
+    <div class="section-title stagger">今日已办结</div>
+    <div class="card list-card stagger">
+      ${listRow({ic:'checkCircle',t:'年报抽查结项 · 常熟体验中心',s:'10/28 · 32 项全部合格',val:'通过'})}
+      ${listRow({ic:'checkCircle',t:'季度盘点 · 华东备件仓',s:'10:12 · 盘盈盘平 · 无需调账',val:'通过'})}
+      ${listRow({ic:'shield',t:'子账号开通申请 · 李先生',s:'09:40 · 材料不全，已退回补全',val:'驳回'})}
+    </div>
+  </div>`;
+}
+
+/* ---------- 管理员 · 数据看板 ---------- */
+function detailBoard(){
+  const bars = [['6月',62],['7月',71],['8月',58],['9月',76],['10月',69],['11月',84]];
+  return `<div class="page">
+    ${dpHead('数据看板','2026 年 10 月 · 全国')}
+    ${kpiCard([{raw:'12,800',l:'在保设备'},{to:128,l:'本月工单'},{raw:'84',unit:'%',l:'闭环率'}],'g-cobalt')}
+    <div class="card mini-stats stagger" style="margin-top:var(--s2)">
+      <div><div class="ms-n">36</div><div class="ms-l">服务网点</div></div>
+      <div><div class="ms-n">21</div><div class="ms-l">覆盖城市</div></div>
+      <div><div class="ms-n">3</div><div class="ms-l">待处理投诉</div></div>
+    </div>
+    <div class="section-title stagger">近 6 月工单量</div>
+    <div class="card stagger">
+      <div class="bars">${bars.map((b,i)=>`<div class="bar${i===bars.length-1?' hi':''}" style="height:${Math.round(b[1]*0.8)}px"></div>`).join('')}</div>
+      <div class="bar-labels">${bars.map(b=>`<div>${b[0]}</div>`).join('')}</div>
+    </div>
+    <div class="section-title stagger">区域排行 <span class="st-count">按本月工单</span></div>
+    <div class="card list-card stagger">
+      ${rnk({n:1,top:1,t:'华东大区',s:'上海 / 苏州 / 杭州 · 8 人',v:'52 单'})}
+      ${rnk({n:2,t:'苏南大区',s:'无锡 / 常州 / 南京 · 6 人',v:'41 单'})}
+      ${rnk({n:3,t:'皖中大区',s:'合肥 / 芜湖 · 4 人',v:'28 单'})}
+      ${rnk({n:4,t:'华北大区',s:'天津 / 青岛 · 3 人',v:'19 单'})}
+    </div>
+    <div class="section-title stagger">服务类型占比</div>
+    <div class="card list-card stagger">
+      ${listRow({ic:'tools',t:'例行保养',s:'半月保 / 季度保 / 半年保',val:'58%'})}
+      ${listRow({ic:'pen',t:'安装交付',s:'新梯安装与竣工验收',val:'24%'})}
+      ${listRow({ic:'badge',t:'报修急修',s:'含 96333 应急响应',val:'13%'})}
+      ${listRow({ic:'checkCircle',t:'年检代办',s:'含限速器校验',val:'5%'})}
+    </div>
+    <button class="btn ghost btn-block stagger" style="margin-top:var(--s3)">${icon('receipt',18)} 导出月度报表</button>
+  </div>`;
+}
+
+/* ---------- 管理员 · 人员与权限 ---------- */
+function detailStaff(){
+  return `<div class="page">
+    ${dpHead('人员与权限','品牌总部 · 运营 王敏')}
+    ${kpiCard([{to:6,l:'业务员'},{to:12,l:'技师'},{to:2,l:'管理员'}],'g-cobalt')}
+    <div class="section-title stagger">员工账号</div>
+    <div class="card list-card stagger">
+      ${listRow({ic:'userGroup',t:'业务员',s:'在编 6 人 · 华东 / 苏南 / 皖中',val:'6'})}
+      ${listRow({ic:'tools',t:'安装维保技师',s:'在编 12 人 · 持证率 100%',val:'12'})}
+      ${listRow({ic:'shield',t:'管理员',s:'总部运营 · 含 1 个超管账号',val:'2'})}
+      ${listRow({ic:'badge',t:'待授权申请',s:'周涛 · 申请大区全量查询',val:'1'})}
+    </div>
+    <div class="section-title stagger">会员分配 <span class="st-more" data-page="d-assign">去分配 ${icon('chevron',14,{rot:-90})}</span></div>
+    <div class="card list-card stagger">
+      <div class="list-row" data-page="d-assign"><div class="lr-ic">${icon('swap',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">待分配会员 ${unassignedCount()} 位</div><div class="lr-s">指派后自动进入该业务员的客户列表</div></div>
+        <span class="lr-arrow">${icon('chevron',18,{rot:-90})}</span></div>
+      ${listRow({ic:'userGroup',t:'在职业务员',s:SALES_TEAM.join(' / '),val:String(SALES_TEAM.length)})}
+    </div>
+    <div class="section-title stagger">会员权限 <span class="st-count">4 位业主</span></div>
+    <div class="card list-card stagger">
+      ${MEMBER_PERMS.map((x,j)=>`<div class="list-row" data-page="d-perm" data-arg="${j}"><div class="lr-ic">${icon('keyIcon',18)}</div>
+        <div style="flex:1;min-width:0"><div class="lr-t">${x.name} · ${x.role}</div><div class="lr-s">${x.org} · 已开启 ${x.perms.filter(p=>p[2]).length}/${x.perms.length} 项权限</div></div>
+        <span class="lr-arrow">${icon('chevron',18,{rot:-90})}</span></div>`).join('')}
+    </div>
+    <div class="notice stagger">权限遵循最小可用原则：新注册业主默认仅开放「查看运行数据」与「提交报修」两项。</div>
+  </div>`;
+}
+
+/* ---------- 分享成为会员（所有角色入口，规则按角色变化） ---------- */
+function detailInvite(){
+  const role = currentRole;
+  const me = ROLES[role].user;
+  const isAdmin = role==='admin', isSales = role==='sales';
+  /* 业务员：自己邀来的会员自动归属本人 */
+  const mine = CLIENTS.filter(c => c.source==='扫码邀请' && c.owner===me);
+  const invCode = role==='sales' ? 'FRL-8H42' : (role==='admin' ? 'FRL-HQ01' : 'FRL-M' + (role==='worker' ? '1042' : '2087'));
+  const rule = isSales ? '客户扫码注册后自动归属你名下，无需管理员再分配，业绩与佣金即时计入。'
+    : isAdmin ? '渠道邀请码注册的会员默认进入「未分配」池，需你在会员分配中指派归属业务员。'
+    : '好友通过你的邀请码注册并完成建档，即为推荐成功，双方权益自动发放。';
+  const reward = isSales ? [['¥48.6万','本月业绩'],['8','新增客户'],['3','待跟进']]
+    : [['12,800','在保设备'],['36','服务网点'],['4','在营门店']];
+  return `<div class="page">
+    ${dpHead('邀请成为会员', INVITE_COPY[role].sub)}
+    <div class="card pad stagger" style="text-align:center">
+      <div class="rp-tag" style="display:inline-block; margin-bottom:var(--s3)">INVITE CODE</div>
+      <div style="display:flex; justify-content:center; padding:var(--s2) 0">${qrSvg(120)}</div>
+      <div class="rp-title" style="margin-top:var(--s2)">邀请码 ${invCode}</div>
+      <div class="rp-biglabel">会员注册时填写邀请码即可建立归属</div>
+      <div style="display:flex; gap:var(--s2); margin-top:var(--s3)">
+        <button class="btn ghost btn-block stagger" data-copy>${icon('copy',18)} 复制邀请码</button>
+        <button class="btn ghost btn-block stagger" data-copy="${invCode}">${icon('link',18)} 复制链接</button>
+      </div>
+    </div>
+    ${kpiCard(reward.map(r=>({raw:r[0], l:r[1]})), 'g-plum')}
+    <div class="notice stagger">${rule}</div>
+    <div class="section-title stagger">${isAdmin?'邀请明细':'我邀请的会员'} <span class="st-count">${isAdmin?CLIENTS.length+' 位':mine.length+' 位'}</span></div>
+    <div class="card list-card stagger">
+      ${(isAdmin?CLIENTS:mine).map(c=>{
+        const i = CLIENTS.indexOf(c);
+        return `<div class="list-row" data-page="d-client" data-arg="${i}"><div class="lr-ic">${icon('user',18)}</div>
+          <div style="flex:1;min-width:0"><div class="lr-t">${c.key} · ${c.addr}</div><div class="lr-s">${c.source} · ${c.since}</div></div>
+          ${c.owner?`<span class="chip on">${c.owner}</span>`:`<span class="chip">未分配</span>`}
+          <span class="lr-arrow">${icon('chevron',18,{rot:-90})}</span></div>`;
+      }).join('') || `<div class="list-row"><div class="lr-ic">${icon('gift',18)}</div>
+          <div style="flex:1;min-width:0"><div class="lr-t">还没有邀请记录</div><div class="lr-s">分享邀请码后，注册成功的会员会出现在这里</div></div></div>`}
+    </div>
+    ${isAdmin?`<button class="btn cta btn-block stagger" style="margin-top:var(--s3)" data-page="d-assign">${icon('swap',18)} 去分配会员归属</button>`:''}
+    <div class="version stagger">归属关系以会员注册时的邀请码为准，管理员可随时改派</div>
+  </div>`;
+}
+
+/* ---------- 管理员 · 会员分配（可将会员指派给业务员） ---------- */
+function detailAssign(){
+  const un = CLIENTS.map((c,i)=>({c,i})).filter(o=>!o.c.owner);
+  const as = CLIENTS.map((c,i)=>({c,i})).filter(o=>o.c.owner);
+  const picker = i => SALES_TEAM.map(s=>{
+    const cur = CLIENTS[i].owner;
+    return `<div class="pick-row${cur===s?' on':''}" data-assign="${i}" data-sales="${s}" role="radio" aria-checked="${cur===s}">
+      <div class="pick-dot"></div><div class="pick-t">${s}</div>
+      <div class="pick-n">名下 ${CLIENTS.filter(c=>c.owner===s).length} 位</div></div>`;
+  }).join('');
+  return `<div class="page">
+    ${dpHead('会员分配','品牌总部 · 运营 · 王敏')}
+    ${kpiCard([{to:un.length,l:'待分配'},{to:as.length,l:'已分配'},{to:SALES_TEAM.length,l:'在职业务员'}],'g-cobalt')}
+    <div class="notice stagger">点击业务员即可完成改派；新归立即生效，会员详情与客户列表会同步显示归属人。</div>
+    ${un.length?`<div class="section-title stagger">待分配会员 <span class="st-count">${un.length} 位</span></div>`:''}
+    ${un.map(o=>`<div class="card task-col stagger">
+      <div class="task-top"><div class="tk-main">
+        <div class="tk-t">${o.c.key} · ${o.c.addr}</div>
+        <div class="tk-s">${o.c.source} · 注册 ${o.c.since} · ${o.c.model}</div>
+        <div class="tk-tags"><span class="status-pill sp-warn">未分配</span><span class="chip">${o.c.stage}</span></div>
+      </div></div>
+      <div class="tk-pick">${picker(o.i)}</div>
+    </div>`).join('')}
+    <div class="section-title stagger">已分配会员 <span class="st-count">${as.length} 位 · 可点击改派</span></div>
+    ${as.map(o=>`<div class="card task-col stagger">
+      <div class="task-top"><div class="tk-main">
+        <div class="tk-t">${o.c.key} · ${o.c.addr}</div>
+        <div class="tk-s">${o.c.source} · 归属 ${o.c.owner} · ${o.c.since}</div>
+        <div class="tk-tags"><span class="status-pill sp-ok">已归属</span><span class="chip">${o.c.stage}</span></div>
+      </div></div>
+      <div class="tk-pick">${picker(o.i)}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+const DETAIL_PAGE = {
+  'd-member':detailMember, 'd-sales':detailSales, 'd-worker':detailWorker, 'd-admin':detailAdmin,
+  'd-client':detailClient, 'd-write':detailWrite, 'd-edit':detailEdit,
+  'd-tech':detailTech, 'd-cert':detailCert, 'd-perm':detailPerm,
+  'd-booking':detailBooking, 'd-repair':detailRepair, 'd-warranty':detailWarranty,
+  'd-clients':detailClients, 'd-promo':detailPromo, 'd-commission':detailCommission,
+  'd-records':detailRecords, 'd-parts':detailParts,
+  'd-stores':detailStores, 'd-approve':detailApprove, 'd-board':detailBoard, 'd-staff':detailStaff,
+  'd-invite':detailInvite, 'd-assign':detailAssign,
+  'd-dispatch':detailDispatch, 'd-orders':detailOrders,
+  'd-order':detailOrder, 'd-cycle':detailCycle, 'd-skip':detailSkip
+};
+
+/* ===================== Render / motion ===================== */
+const content = document.getElementById('content');
+const tabRow = document.getElementById('tab-row');
+const indicator = document.getElementById('tab-indicator');
+const navTitle = document.getElementById('nav-title');
+const rolePill = document.getElementById('role-pill');
+
+function buildTabs(roleKey){
+  [...tabRow.querySelectorAll('.tab')].forEach(t=>t.remove());
+  const r = ROLES[roleKey];
+  TABS.forEach((t,i)=>{
+    const el = document.createElement('div');
+    el.className = 'tab' + (t.id===currentTab?' active':'');
+    const isMine = t.id==='mine';
+    const msg = isMine ? r.messages : 0;
+    if(isMine && msg>0) el.classList.add('has-msg');
+    const dot = (isMine && msg>0) ? `<span class="tab-dot">${msg>9?'9+':msg}</span>` : '';
+    el.innerHTML = `<span class="tab-ic">${icon(t.icon,24)}${dot}</span><span class="tab-label">${t.label}</span>`;
+    el.addEventListener('click', ()=>switchTab(t.id, i));
+    tabRow.appendChild(el);
+  });
+  positionIndicator();
+}
+function positionIndicator(){
+  const idx = TABS.findIndex(t=>t.id===currentTab);
+  indicator.style.transform = `translateX(${idx*100}%)`;
+}
+function setNav(){
+  navTitle.textContent = TAB_TITLE[currentTab] || '弗朗茨';
+  rolePill.innerHTML = `<span class="dot"></span>${ROLES[currentRole].name} ${icon('chevron',14,{rot:90})}`;
+}
+/* toast — feedback for assignment / copy (no emoji, no external asset) */
+function toast(msg){
+  const host = document.getElementById('device');
+  let t = host.querySelector('.toast');
+  if(!t){ t = document.createElement('div'); t.className = 'toast'; host.appendChild(t); }
+  t.textContent = msg;
+  requestAnimationFrame(()=>t.classList.add('show'));
+  clearTimeout(toast._h);
+  toast._h = setTimeout(()=>t.classList.remove('show'), 1800);
+}
+function paint(tabId){
+  /* stop + mute any existing video before the DOM node is replaced */
+  const oldV = document.getElementById('heroVideo');
+  if(oldV){ oldV.pause(); oldV.muted = true; }
+
+  if(tabId) currentTab = tabId;
+  let html;
+  if(currentPage && DETAIL_PAGE[currentPage.id]) html = DETAIL_PAGE[currentPage.id](currentPage.arg);
+  else if(currentTab==='home') html = homeShowcase();
+  else if(currentTab==='products') html = tabProducts();
+  else if(currentTab==='maintenance') html = tabMaintenance();
+  else html = tabMine(currentRole);
+  content.innerHTML = html;
+  setNav();
+  runCountUp();
+  materialize();
+  if(!currentPage && currentTab==='home') initVideoHero();
+  content.scrollTop = 0;
+}
+function switchTab(tabId, idx){
+  if(tabId===currentTab){
+    /* tapping the active tab from a detail page returns to its root */
+    if(currentPage){ currentPage = null; pageStack = []; paint(tabId); }
+    return;
+  }
+  currentPage = null;
+  pageStack = [];
+  currentTab = tabId;
+  [...tabRow.querySelectorAll('.tab')].forEach((t,i)=>t.classList.toggle('active', i===idx));
+  positionIndicator();
+  paint(tabId);
+}
+/* detail pages stack: 日历 → 工单详情 → 定时维保 / 跳过，返回时逐级回退 */
+let pageStack = [];
+function openPage(id, arg){
+  if(currentPage) pageStack.push({ ...currentPage });
+  currentPage = { id, arg };
+  paint();
+}
+function closePage(){
+  currentPage = pageStack.length ? pageStack.pop() : null;
+  paint();
+}
+function switchRole(roleKey){
+  currentRole = roleKey;
+  /* role panels belong to their own role — leave any open detail page */
+  currentPage = null;
+  pageStack = [];
+  buildTabs(currentRole);
+  setNav();
+  if(currentTab==='mine') paint('mine');
+  renderSheet();
+  closeSheet();
+}
+
+/* count-up (load-time only) */
+function fmt(v,type){
+  if(type==='pct') return v+'%';
+  if(type==='plain') return String(v);
+  return v.toLocaleString('zh-CN');
+}
+function runCountUp(){
+  document.querySelectorAll('[data-to]').forEach(el=>{
+    const to = +el.dataset.to, type = el.dataset.fmt, dec = +(el.dataset.dec||0);
+    const show = v => el.textContent = dec ? v.toFixed(dec) : fmt(Math.round(v), type);
+    if(matchReduced){ show(to); return; }
+    const dur = 900, t0 = performance.now();
+    const step = (t)=>{
+      const p = Math.min(1,(t-t0)/dur);
+      const e = 1 - Math.pow(1-p,3);
+      show(to*e);
+      if(p<1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}
+/* materialize (blur -> clear) */
+function materialize(){
+  const els = [...content.querySelectorAll('.stagger')];
+  if(matchReduced){ els.forEach(e=>e.classList.add('show')); return; }
+  els.forEach((e,i)=>setTimeout(()=>e.classList.add('show'), Math.min(i*35,500)));
+}
+
+/* ===================== Video hero: state + controls ===================== */
+function initVideoHero(){
+  const v = document.getElementById('heroVideo');
+  if(!v) return;
+  const soundBtn = document.getElementById('soundBtn');
+  const playBtn  = document.getElementById('playBtn');
+  const soundIc  = document.getElementById('soundIc');
+  const soundTxt = document.getElementById('soundTxt');
+  const playIc   = document.getElementById('playIc');
+  const hint     = document.getElementById('vhHint');
+
+  /* Reduced motion: no autoplay — show poster, let the user start manually */
+  if(matchReduced){
+    v.autoplay = false;
+    v.pause();
+  } else {
+    v.muted = true;
+    const p = v.play();
+    if(p && p.catch) p.catch(()=>{ /* autoplay blocked: poster stays, play button available */ });
+  }
+
+  function syncSound(){
+    const muted = v.muted;
+    soundIc.innerHTML = icon(muted?'volumeX':'volume2',16,{sw:1.6});
+    soundTxt.textContent = muted ? '开启声音' : '关闭声音';
+    soundBtn.setAttribute('aria-label', muted?'开启声音（当前静音）':'关闭声音（正在播放音乐）');
+    soundBtn.setAttribute('aria-pressed', String(!muted));
+    hint.textContent = muted ? '品牌影片 · 静音循环播放' : '品牌影片 · 音乐播放中';
+  }
+  function syncPlay(){
+    playIc.innerHTML = icon(v.paused?'play':'pause',16,{sw:v.paused?1.6:2});
+    playBtn.setAttribute('aria-label', v.paused?'播放':'暂停');
+  }
+  syncSound();
+  syncPlay();
+
+  /* Manual music: tap to unmute (user gesture satisfies autoplay-with-sound policy) */
+  soundBtn.addEventListener('click', ()=>{
+    v.muted = !v.muted;
+    if(!v.muted && v.paused){ const p = v.play(); if(p && p.catch) p.catch(()=>{}); }
+    syncSound();
+    syncPlay();
+  });
+  /* Pause control for the ambient loop */
+  playBtn.addEventListener('click', ()=>{
+    if(v.paused){ const p = v.play(); if(p && p.catch) p.catch(()=>{}); }
+    else v.pause();
+    syncPlay();
+  });
+  /* Tap the film itself to toggle playback */
+  v.addEventListener('click', ()=>{
+    if(v.paused){ const p = v.play(); if(p && p.catch) p.catch(()=>{}); }
+    else v.pause();
+    syncPlay();
+  });
+  v.addEventListener('play', syncPlay);
+  v.addEventListener('pause', syncPlay);
+  v.addEventListener('volumechange', syncSound);
+}
+
+/* ===================== Role switch sheet ===================== */
+const backdrop = document.getElementById('backdrop');
+const sheet = document.getElementById('sheet');
+const sheetList = document.getElementById('sheet-list');
+function renderSheet(){
+  sheetList.innerHTML = ROLE_ORDER.map(k=>{
+    const r = ROLES[k], cur = k===currentRole;
+    return `<div class="sheet-row ${cur?'cur':''}" data-role="${k}">
+      <div class="sr-av">${r.name.slice(0,1)}</div>
+      <div><div class="sr-name">${r.name}</div><div class="sr-org">${r.org}</div></div>
+      <div class="sr-right">${r.messages>0?`<span class="sr-badge">${r.messages} 条消息</span>`:''}${cur?`<span style="color:var(--fg)">${icon('checkCircle',18)}</span>`:''}</div>
+    </div>`;
+  }).join('');
+}
+function openSheet(){ backdrop.classList.add('show'); sheet.classList.add('show'); }
+function closeSheet(){ backdrop.classList.remove('show'); sheet.classList.remove('show'); }
+
+/* ===================== Events ===================== */
+rolePill.addEventListener('click', openSheet);
+backdrop.addEventListener('click', closeSheet);
+document.getElementById('sheet-cancel').addEventListener('click', closeSheet);
+sheetList.addEventListener('click', e=>{
+  const row = e.target.closest('[data-role]');
+  if(row) switchRole(row.dataset.role);
+});
+content.addEventListener('click', e=>{
+  /* detail page navigation */
+  if(e.target.closest('[data-back]')){ closePage(); return; }
+  const pg = e.target.closest('[data-page]');
+  if(pg && DETAIL_PAGE[pg.dataset.page]){ openPage(pg.dataset.page, pg.dataset.arg); return; }
+  const seg = e.target.closest('.seg-tab');
+  if(seg){
+    seg.parentElement.querySelectorAll('.seg-tab').forEach(s=>{
+      s.classList.remove('on'); s.setAttribute('aria-selected','false'); });
+    seg.classList.add('on'); seg.setAttribute('aria-selected','true');
+    return;
+  }
+  const asg = e.target.closest('[data-assign]');
+  if(asg){
+    const i = +asg.dataset.assign, name = asg.dataset.sales, m = CLIENTS[i];
+    const changed = m.owner !== name;
+    m.owner = name;
+    if(changed && m.source!=='扫码邀请') m.source = '管理员分配';
+    toast(changed ? `已将 ${m.key} 指派给 ${name}` : `${m.key} 已归属于 ${name}`);
+    paint();
+    return;
+  }
+  const cp = e.target.closest('[data-copy]');
+  if(cp){
+    const btn = cp, old = btn.textContent;
+    btn.textContent = cp.dataset.copy && cp.dataset.copy !== 'true'
+      ? '已复制链接' : '已复制邀请码';
+    toast(btn.textContent.replace(/^\s+/,''));
+    setTimeout(()=>btn.textContent = old, 1400);
+    return;
+  }
+  const save = e.target.closest('[data-save]');
+  if(save){
+    const btn = save, old = btn.textContent;
+    btn.textContent = btn.dataset.save || '已保存';
+    btn.disabled = true;
+    setTimeout(()=>{ btn.textContent = old; btn.disabled = false; }, 1600);
+    return;
+  }
+  /* ---------- dispatch calendar: month / filter / day / assignee ---------- */
+  const mo = e.target.closest('[data-month]');
+  if(mo){
+    let m = DISPATCH.m + (+mo.dataset.month), y = DISPATCH.y;
+    if(m<0){ m=11; y--; } if(m>11){ m=0; y++; }
+    DISPATCH.m = m; DISPATCH.y = y;
+    DISPATCH.day = (y===2026 && m===10) ? 3 : 1;
+    paint();
+    return;
+  }
+  const flt = e.target.closest('[data-filter]');
+  if(flt){
+    DISPATCH.filter = flt.dataset.filter;
+    [...flt.parentElement.querySelectorAll('[data-filter]')].forEach(c=>c.classList.toggle('on', c===flt));
+    const g = document.getElementById('cal-grid'), l = document.getElementById('day-list');
+    if(g) g.innerHTML = calCellsHtml();
+    if(l) l.innerHTML = dayListHtml();
+    return;
+  }
+  const cell = e.target.closest('.cal-cell[data-day]');
+  if(cell){
+    DISPATCH.day = +cell.dataset.day;
+    [...cell.parentElement.querySelectorAll('.cal-cell')].forEach(c=>c.classList.remove('on'));
+    cell.classList.add('on');
+    const l = document.getElementById('day-list');
+    if(l) l.innerHTML = dayListHtml();
+    return;
+  }
+  const tech = e.target.closest('[data-tech]');
+  if(tech){
+    const i = +tech.dataset.order, o = ORDERS[i], name = tech.dataset.tech;
+    o.tech = name; o.st = '待服务';
+    toast(`${o.m} 的${o.t}已派给 ${name}`);
+    paint();
+    return;
+  }
+  /* single-select chip group (e.g. dispatch form) — must run before the multi-toggle handler */
+  const radio = e.target.closest('.chips[data-single] .chip');
+  if(radio){
+    radio.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+    radio.classList.add('on');
+    return;
+  }
+  const chip = e.target.closest('.chip[data-toggle]');
+  if(chip){ chip.classList.toggle('on'); return; }
+  const perm = e.target.closest('[data-perm]');
+  if(perm){ openPage('d-perm', perm.dataset.perm); return; }
+  const up = e.target.closest('[data-upload]');
+  if(up){
+    const zone = up.querySelector('.up-files');
+    zone.innerHTML = `<div class="up-file">${icon('certificate',18)} 已选择：${up.dataset.name || '证书扫描件_20261101.pdf'} · 待提交审核</div>`;
+    up.querySelector('.up-t').textContent = '重新选择文件';
+    return;
+  }
+  const go = e.target.closest('[data-go]');
+  if(go){ const id = go.dataset.go, idx = TABS.findIndex(t=>t.id===id); switchTab(id, idx); return; }
+  const tgl = e.target.closest('.tgl');
+  if(tgl){
+    const on = tgl.classList.toggle('on');
+    tgl.setAttribute('aria-checked', on?'true':'false');
+    return;
+  }
+  if(e.target.closest('[data-role-switch]')) openSheet();
+});
+
+/* ===================== Boot ===================== */
+function boot(){
+  buildTabs(currentRole);
+  paint('home');
+  renderSheet();
+}
+boot();
+
+/* ===================== Device scaling ===================== */
+function fitDevice(){
+  const d = document.getElementById('device');
+  const scale = Math.min(1, (window.innerHeight-32)/852, (window.innerWidth-32)/393);
+  d.style.transform = `scale(${scale})`;
+  d.style.transformOrigin = 'center center';
+}
+window.addEventListener('resize', fitDevice);
+fitDevice();
+</script>
+</body>
+</html>
