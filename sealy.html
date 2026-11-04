@@ -190,6 +190,13 @@ body{
   transition:transform var(--dur-page) var(--ease),opacity var(--dur-page) var(--ease);
 }
 .tabbar.hide{transform:translateY(100%);opacity:0;pointer-events:none}
+.checkcircle{width:22px;height:22px;border-radius:999px;border:1.5px solid var(--line);display:grid;place-items:center;color:#fff;flex:0 0 auto;transition:all var(--dur-micro) var(--ease)}
+.checkcircle.on{background:var(--accent);border-color:var(--accent)}
+.actionbar{position:absolute;left:0;right:0;bottom:78px;z-index:58;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:12px var(--s5);display:flex;align-items:center;gap:var(--s2)}
+.seg2{position:relative;display:flex;background:var(--panel);border-radius:var(--r-pill);padding:4px}
+.seg2 button{flex:1;border:0;background:transparent;padding:10px 0;font:500 14px/1 var(--font-sans);color:var(--ink-2);position:relative;z-index:1;cursor:pointer}
+.seg2 button.on{color:var(--accent)}
+.seg2 .seg-ind{position:absolute;top:4px;left:4px;width:calc(50% - 4px);height:calc(100% - 8px);background:var(--surface);border-radius:var(--r-pill);box-shadow:var(--shadow-card);transition:transform var(--dur-page) var(--ease-out)}
 .tab{flex:1;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
   color:var(--ink-3);cursor:pointer;padding:6px 0;transition:color var(--dur-micro) var(--ease)}
 .tab.on{color:var(--accent)}
@@ -486,7 +493,9 @@ const I = {
   edit:'<path d="M4 20h4L18 10l-4-4L4 16v4Z"/><path d="m13 5 4 4"/>',
   trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
   sound:'<path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16 8.5a4 4 0 0 1 0 7M18.7 6a7 7 0 0 1 0 12"/>',
-  mute:'<path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="m16 9 5 6M21 9l-5 6"/>'
+  mute:'<path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="m16 9 5 6M21 9l-5 6"/>',
+  cat:'<rect x="3" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.6"/>',
+  send:'<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/>'
 };
 function ic(n,s){s=s||20;return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+(I[n]||'')+'</svg>';}
 
@@ -499,14 +508,18 @@ const state = { id:'m-home', stack:[], role:'member', spec:false, signed:false, 
 
 /* 可变数据层：产品 / 案例由管理后台增删改查维护，首页与列表读取此处（演示态，真实项目落云数据库） */
 const PROD_ATTRS=[
-  {series:'铭郡系列',firm:'适中',size:'1.8m × 2.0m',badge:'旗舰系列',store:'Sealy丝涟床垫(常熟好得家精品馆)'},
-  {series:'铭郡系列',firm:'偏硬',size:'1.8m × 2.0m',badge:'旗舰系列',store:'丝涟床垫常熟禧徕乐店'},
-  {series:'铭郡系列',firm:'偏软',size:'1.5m × 2.0m',badge:'热销',store:'Sealy丝涟床垫(常熟好得家精品馆)'}
+  {series:'铭郡系列',firm:'适中',size:'1.8m × 2.0m',badge:'旗舰系列',store:'Sealy丝涟床垫(常熟好得家精品馆)',category:'床垫'},
+  {series:'铭郡系列',firm:'偏硬',size:'1.8m × 2.0m',badge:'旗舰系列',store:'丝涟床垫常熟禧徕乐店',category:'床垫'},
+  {series:'铭郡系列',firm:'偏软',size:'1.5m × 2.0m',badge:'热销',store:'Sealy丝涟床垫(常熟好得家精品馆)',category:'枕头'}
 ];
 state.products = SEED.products.map((p,i)=>Object.assign({}, p, PROD_ATTRS[i]||PROD_ATTRS[0]));
-state.cases    = SEED.cases.map(c=>Object.assign({}, c, {loc:null}));
+state.cases    = SEED.cases.map(c=>Object.assign({}, c, {loc:null, video:'', videoLink:''}));
+/* 演示：案例支持视频直链与短视频外链（管理后台可配置） */
+if(state.cases[0]) state.cases[0].videoLink = 'https://v.douyin.com/sealy-demo';
+if(state.cases[1]) state.cases[1].video = 'assets/video.mp4';
 state.curProduct = null;
-state.prodFilter = {series:'', firm:'', size:''};
+state.categories = ['床垫','床','枕头'];
+state.prodFilter = {series:'', firm:'', size:'', category:''};
 
 /* 门店：首页门店地址区与「门店上架产品」详情页的数据源；产品通过 store 字段归属门店 */
 state.stores = [
@@ -570,6 +583,33 @@ state.clients = [
 ];
 state.tags = ['意向客户','沟通中','已婉拒','新客','生日关怀','售后','复购'];
 state.curClient = 0;
+/* 客户分类标记（演示态）：意向客户 / 成交客户（S/A/B/C 按成交金额分级）；与会员标签（tag）并存 */
+state.custTypes = ['意向客户','成交客户'];
+state.custLevels = [
+  {k:'S',label:'S · 5万及以上'},
+  {k:'A',label:'A · 3万及以上'},
+  {k:'B',label:'B · 1-3万'},
+  {k:'C',label:'C · 1万及以下'}
+];
+(function(){
+  const def=[['成交客户','A'],['成交客户','B'],['意向客户',''],['意向客户',''],['成交客户','S']];
+  state.clients.forEach((c,i)=>{
+    if(!c.ctype) c.ctype = def[i] ? def[i][0] : (c.orders&&c.orders.length ? '成交客户':'意向客户');
+    if(c.ctype==='成交客户' && !c.level) c.level = def[i] ? def[i][1] : 'B';
+    if(!c.bind) c.bind = '已绑定';   /* 存量会员均已通过小程序绑定手机号 */
+  });
+})();
+/* 会员管理：归属顾问、批量选择、通知渠道（短信 / 服务号）、手机号绑定 */
+state.advisors = ['好得家旗舰店 · 秦怡','好得家居然之家店 · 周敏','好得家体验店 · 孙浩'];
+state.clientsSel = new Set();
+state.clientsSelectMode = false;
+state.notifyChannel = 'sms';
+/* 近期促销活动：后台配置活动图片，会员端点击弹窗看大图 */
+state.promos = [
+  {title:'双十一焕新季', sub:'指定系列尊享焕新补贴', img:''},
+  {title:'到店试睡礼', sub:'到店即赠寝具深度清洁一次', img:''},
+  {title:'老客户转介绍', sub:'成功推荐赠 500 积分', img:''}
+];
 
 const $ = id => document.getElementById(id);
 const viewport = $('viewport'), tabbar = $('tabbar'), statusbar = $('statusbar');
@@ -612,6 +652,13 @@ S['m-home'] = {
             <img src="${LOGO_SRC}" alt="Sealy" style="height:26px;width:auto;filter:drop-shadow(0 2px 6px rgba(0,0,0,.28))">
             <span class="eyebrow" style="color:rgba(255,255,255,.62);margin:0">SEALY · MEMBER</span>
           </div>
+        </div>
+      </div>
+      <div style="margin-top:var(--s4);padding:0 var(--s2);text-align:center;animation:rise 360ms var(--ease) 260ms both">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:9px">
+          <div style="font:600 17px/1.25 var(--font-sans);color:var(--ink);letter-spacing:.1em">丝涟床垫<span style="color:var(--accent);margin:0 2px">｜</span>百年品牌</div>
+          <div style="width:44px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.7"></div>
+          <div style="color:var(--ink-2);font:400 13px/1.6 var(--font-sans);letter-spacing:.16em">十年整床质保 · 安心好眠</div>
         </div>
       </div>
 
@@ -662,19 +709,14 @@ S['m-home'] = {
       </div>
 
       <div class="between stg" style="--i:6;margin-top:var(--s6);margin-bottom:var(--s3)">
-        <div class="t-head">推荐系列</div>
-        <button class="press" onclick="go('m-plist')" style="border:0;background:transparent;color:var(--ink-3);font:400 13px/1 var(--font-sans);display:flex;align-items:center;gap:4px">全部 ${ic('chevR',14)}</button>
+        <div class="t-head">近期促销活动</div>
+        <button class="press" onclick="toast('促销活动由管理后台配置')" style="border:0;background:transparent;color:var(--ink-3);font:400 13px/1 var(--font-sans);display:flex;align-items:center;gap:4px">全部 ${ic('chevR',14)}</button>
       </div>
-      <div class="stg" style="--i:7;display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)">
-        ${state.products.slice(0,2).map((p,i)=>`
-          <div class="card press" onclick="state.curProduct=state.products[${i}];go('m-product')" style="padding:0;overflow:hidden;position:relative">
-            <img src="${p.img}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--panel)" alt="">
-            <button class="iconbtn press" onclick="event.stopPropagation();toggleFav('${p.name.replace(/'/g,"’")}', '${p.img}', '${p.sub}', this)" style="position:absolute;top:10px;right:10px;width:34px;height:34px;background:rgba(255,255,255,.86);backdrop-filter:blur(8px)">${favIcon(isFav(p.name))}</button>
-            <div style="padding:var(--s3)">
-              <div class="t-head" style="font-size:15px">${p.name}</div>
-              <div class="t-cap" style="margin-top:2px">${p.sub}</div>
-              <div class="t-cap" style="margin-top:var(--s2);color:var(--accent);font-weight:500">到店咨询专属报价</div>
-            </div>
+      <div class="stg" style="--i:7;display:flex;gap:var(--s3);overflow-x:auto;padding-bottom:var(--s2)">
+        ${state.promos.map((p,i)=>`
+          <div class="card press" onclick="openPromo(${i})" style="flex:0 0 200px;padding:0;overflow:hidden">
+            ${p.img?`<img src="${p.img}" style="width:100%;aspect-ratio:16/10;object-fit:cover;display:block;background:var(--panel)" alt="">`:`<div style="width:100%;aspect-ratio:16/10;display:grid;place-items:center;background:linear-gradient(135deg,#0e3a6e,#1d5fa8);color:#fff;text-align:center;padding:var(--s3)"><div style="font:600 15px/1.4 var(--font-sans)">${p.title}</div><div style="font:400 12px/1.4 var(--font-sans);opacity:.85;margin-top:6px">${p.sub}</div></div>`}
+            <div style="padding:var(--s3)"><div class="t-head" style="font-size:14px">${p.title}</div><div class="t-cap">${p.sub}</div></div>
           </div>`).join('')}
       </div>
 
@@ -684,8 +726,9 @@ S['m-home'] = {
       </div>
       <div class="stg" style="--i:9;display:flex;gap:var(--s3);overflow-x:auto;padding-bottom:var(--s2)">
         ${state.cases.map((c,i)=>`
-          <div class="card press" onclick="state.curCase=state.cases[${i}];toast('案例：${c.title}')" style="flex:0 0 200px;padding:0;overflow:hidden">
+          <div class="card press" onclick="openCase(${i})" style="flex:0 0 200px;padding:0;overflow:hidden;position:relative">
             <img src="${c.img}" style="width:100%;aspect-ratio:16/10;object-fit:cover;display:block;background:var(--panel)" alt="">
+            ${(c.video||c.videoLink)?`<div style="position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff;display:grid;place-items:center">${ic('video',14)}</div>`:''}
             <div style="padding:var(--s3)"><div class="t-head" style="font-size:14px">${c.title}</div><div class="t-cap">${c.sub}</div>${c.loc?`<div class="t-cap" style="margin-top:4px;color:var(--accent)">${ic('loc',12)} ${c.loc.addr}</div>`:''}</div>
           </div>`).join('')}
       </div>
@@ -907,10 +950,10 @@ S['m-plist'] = {
   html(){
     const f = state.prodFilter;
     const list = state.products.filter(p=>
-      (!f.series||p.series===f.series) && (!f.firm||p.firm===f.firm) && (!f.size||p.size===f.size));
-    const active = f.series||f.firm||f.size;
+      (!f.series||p.series===f.series) && (!f.firm||p.firm===f.firm) && (!f.size||p.size===f.size) && (!f.category||p.category===f.category));
+    const active = f.series||f.firm||f.size||f.category;
     const cnt = [f.series,f.firm,f.size].filter(Boolean).length;
-    const tags = [['series',f.series],['firm',f.firm],['size',f.size]].filter(x=>x[1]);
+    const tags = [['series',f.series],['firm',f.firm],['size',f.size],['category',f.category]].filter(x=>x[1]);
     return `
     <div class="navbar">
       <h1>产品</h1>
@@ -923,11 +966,15 @@ S['m-plist'] = {
       <div class="card" style="padding:var(--s3)">
         <div class="row" style="gap:var(--s2)"><span style="color:var(--accent)">${ic('search',18)}</span><input class="input" style="border:0;padding:6px 0" placeholder="搜索产品名称 / 系列" onfocus="toast('搜索产品')"></div>
       </div>
+      <div class="row" style="gap:var(--s2);margin-top:var(--s3);flex-wrap:nowrap;align-items:center;overflow-x:auto;padding-bottom:2px">
+        <span class="t-cap" style="flex:0 0 auto">分类</span>
+        ${[''].concat(state.categories).map(c=>`<button class="chip ${(f.category||'')===c?'on':'press'}" style="flex:0 0 auto" onclick="quickCategory('${c}')">${c||'全部'}</button>`).join('')}
+        <span style="flex:1"></span>
+        <span class="t-cap" style="color:var(--accent);flex:0 0 auto">共 ${list.length} 款</span>
+      </div>
       <div class="row" style="gap:var(--s2);margin-top:var(--s3);flex-wrap:wrap;align-items:center">
         <span class="t-cap">软硬度</span>
         ${['','偏硬','适中','偏软'].map(s=>`<button class="chip ${(f.firm||'')===s?'on':'press'}" onclick="quickFirm('${s}')">${s||'全部'}</button>`).join('')}
-        <span style="flex:1"></span>
-        <span class="t-cap" style="color:var(--accent)">共 ${list.length} 款</span>
       </div>
       ${active?`<div class="row" style="gap:var(--s2);margin:var(--s4) 0;flex-wrap:wrap;align-items:center">
         <span class="t-cap">已筛选</span>
@@ -947,7 +994,7 @@ S['m-plist'] = {
             <div style="padding:var(--s3)">
               <div class="t-head" style="font-size:15px">${p.name}</div>
               <div class="t-cap" style="margin-top:2px">${p.sub}</div>
-              <div class="row" style="gap:6px;margin-top:var(--s2);flex-wrap:wrap"><span class="badge blue" style="font-size:11px">${p.firm}</span><span class="badge gold" style="font-size:11px">${p.badge}</span></div>
+              <div class="row" style="gap:6px;margin-top:var(--s2);flex-wrap:wrap"><span class="badge" style="font-size:11px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line)">${p.category}</span><span class="badge blue" style="font-size:11px">${p.firm}</span><span class="badge gold" style="font-size:11px">${p.badge}</span></div>
             </div>
           </div>`).join('')}
       </div>`}
@@ -971,6 +1018,7 @@ function openProdFilter(){
         <button class="iconbtn press" onclick="closeProdFilter()">${ic('close')}</button>
       </div>
       <div style="flex:1;overflow:auto;padding:var(--s4)">
+        ${grp('分类','category',state.categories)}
         ${grp('系列','series',['铭郡系列','臻享系列','舒享系列'])}
         ${grp('软硬度','firm',['偏硬','适中','偏软'])}
         ${grp('尺寸','size',['1.5m × 2.0m','1.8m × 2.0m','2.0m × 2.2m'])}
@@ -989,8 +1037,9 @@ function setProdFilter(k,v,btn){
   }
 }
 function quickFirm(v){ state.prodFilter.firm=v; render('in'); }
+function quickCategory(v){ state.prodFilter.category=v; render('in'); }
 function applyProdFilter(){ closeProdFilter(); render('in'); }
-function resetProdFilter(){ state.prodFilter={series:'',firm:'',size:''}; render('in'); }
+function resetProdFilter(){ state.prodFilter={series:'',firm:'',size:'',category:''}; render('in'); }
 function closeProdFilter(){
   const w=$('prodFilterWrap'); if(!w) return;
   const d=w.querySelector('.drawer'), b=w.querySelector('.backdrop');
@@ -1103,6 +1152,52 @@ function toggleVideoSound(){
   toast(state.videoMuted ? '视频已静音' : '视频声音已开启');
 }
 function openAfterSaleBooking(){ go('m-asbook'); }
+/* 客户分类标记：意向客户 / 成交客户（S/A/B/C 按成交金额分级） */
+function custMarker(c){
+  if(!c || c.ctype!=='成交客户'){
+    return '<span style="display:inline-flex;align-items:center;gap:4px;font:500 11px/1 var(--font-sans);padding:4px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent)">意向</span>';
+  }
+  const lv=c.level||'B';
+  const map={S:['#b08d57','#fff'],A:['#2f9e8f','#fff'],B:['#3b6fb0','#fff'],C:['#8a8f99','#fff']};
+  const m=map[lv]||map.B;
+  return '<span style="display:inline-flex;align-items:center;gap:4px;font:600 11px/1 var(--font-sans);padding:4px 8px;border-radius:99px;background:'+m[0]+';color:'+m[1]+'">成交·'+lv+'</span>';
+}
+/* 手机号脱敏：手动新增录入完整号码，列表仅展示掩码 */
+function maskPhone(p){
+  if(!p) return '';
+  if(p.indexOf('*')>=0) return p;
+  if(p.length<7) return p;
+  return p.slice(0,3)+'****'+p.slice(-4);
+}
+/* 会员端：促销活动弹窗看大图 */
+function openPromo(i){
+  const p=state.promos[i];
+  openSheet(`
+    <div class="sheet-grab"></div>
+    <div class="between" style="margin-bottom:var(--s3)"><div class="t-head">${p.title}</div><button class="iconbtn press" onclick="closeSheet()">${ic('close')}</button></div>
+    ${p.img?`<img src="${p.img}" style="width:100%;border-radius:var(--r-md);object-fit:cover;display:block;margin-bottom:var(--s3)" alt="">`:`<div style="width:100%;aspect-ratio:16/10;border-radius:var(--r-md);display:grid;place-items:center;background:linear-gradient(135deg,#0e3a6e,#1d5fa8);color:#fff;text-align:center;padding:var(--s5);margin-bottom:var(--s3)"><div style="font:700 20px/1.4 var(--font-sans)">${p.title}</div><div style="font:400 14px/1.5 var(--font-sans);opacity:.85;margin-top:10px">${p.sub}</div></div>`}
+    <div class="t-sec" style="margin-bottom:var(--s2)">${p.sub}</div>
+    <div class="t-cap" style="margin-bottom:var(--s3)">活动详情与参与规则以门店现场公示为准，最终解释权归丝涟所有。</div>
+    <button class="btn block press" onclick="closeSheet();toast('已领取活动，到店出示会员码参与')">领取活动</button>
+  `);
+}
+/* 会员端：案例详情（支持视频 / 照片 / 短视频外链） */
+function openCase(i){
+  const c=state.cases[i];
+  openSheet(`
+    <div class="sheet-grab"></div>
+    <div class="between" style="margin-bottom:var(--s3)"><div class="t-head">${c.title}</div><button class="iconbtn press" onclick="closeSheet()">${ic('close')}</button></div>
+    ${c.video?`<video src="${c.video}" controls playsinline style="width:100%;border-radius:var(--r-md);background:#000;margin-bottom:var(--s3)" poster="${c.img}"></video>`:`<img src="${c.img}" style="width:100%;border-radius:var(--r-md);object-fit:cover;display:block;margin-bottom:var(--s3)" alt="">`}
+    ${c.videoLink?`<a class="btn block press" style="margin-bottom:var(--s3);text-decoration:none" href="${c.videoLink}" target="_blank" onclick="toast('打开短视频：${c.videoLink}')">${ic('video',16)} 观看短视频</a>`:''}
+    <div class="t-sec" style="margin-bottom:var(--s2)">${c.sub}</div>
+    ${c.loc?`<div class="t-cap" style="color:var(--accent)">${ic('loc',12)} ${c.loc.addr}</div>`:''}
+  `);
+}
+/* 订单产品点击跳转产品介绍 */
+function openOrderProduct(name){
+  const p = state.products.find(x=>x.name===name) || state.products[0];
+  state.curProduct = p; go('m-product');
+}
 /* ---------- 会员 · 售后申请-预约保养 ---------- */
 S['m-asbook'] = {
   role:'member', tab:'m-mine', title:'会员 · 预约保养', depth:2, back:'m-home',
@@ -1284,10 +1379,10 @@ S['m-order'] = {
 S['m-odetail'] = {
   role:'member', tab:'m-order', title:'会员 · 订单详情', depth:2, back:'m-order',
   notes:{
-    '布局要点':'竖向时间轴是页面主角（US-01）；商品与金额区必须带「线下成交说明」，避免系统被当财务凭证（RK-11）。',
-    '动效':'① 时间轴竖线 700ms 自上而下生长；② 节点逐个上浮（90ms 阶梯）；③ 当前节点呼吸光圈；④ 售后入口按压反馈。',
-    '状态':'已包含：单向流转（无回跳操作）、作废需管理员审批提示、配送时间可修改一次。',
-    '依据':'FR-30 状态机单向流转 · RK-11 订单页明示说明 · US-01 进度可视'
+    '布局要点':'订单详情不再展示进度时间轴（仅状态与预计送达）；商品点击可进入产品介绍；金额区带「线下成交说明」，避免系统被当财务凭证（RK-11）。',
+    '动效':'① 卡片 45ms 阶梯入场；② 商品卡按压反馈并跳转产品介绍；③ 售后入口按压反馈。',
+    '状态':'已包含：单向流转（无回跳操作）、作废需管理员审批提示、配送时间可修改一次、商品可点进介绍。',
+    '依据':'FR-30 状态机单向流转 · RK-11 订单页明示说明 · 用户需求：订单进度不显示、产品支持点击配介绍'
   },
   html(){
     const o = state.orders[state.curOrder] || state.orders[0];
@@ -1309,25 +1404,13 @@ S['m-odetail'] = {
         <div class="t-sec" style="margin-top:var(--s3)">师傅将于送达前 30 分钟电话联系您，请保持电话畅通。</div>
       </div>
 
-      <div class="card stg" style="--i:1;margin-top:var(--s3);padding:var(--s5)">
-        <div class="t-head" style="font-size:15px;margin-bottom:var(--s4)">进度</div>
-        <div class="tl">
-          <div class="tl-fill"></div>
-          ${[['已开单','10-23 14:20 · 秦怡','done'],['备货中','10-24 09:05 · 仓储','done'],['配送中','10-25 08:40 · 王师傅','now'],['已送达','预计 10-26',' '],['安装完成','待安排',' ']].map((n,i)=>`
-            <div class="tl-item ${n[2].trim()}" style="--i:${i}">
-              <div class="tl-dot"></div>
-              <div class="t-body" style="font-size:14px;font-weight:${n[2].trim()?'500':'400'};color:${n[2].trim()?'var(--ink)':'var(--ink-3)'}">${n[0]}</div>
-              <div class="t-cap">${n[1]}</div>
-            </div>`).join('')}
-        </div>
-      </div>
-
-      <div class="card stg" style="--i:2;margin-top:var(--s3);padding:var(--s4)">
+      <div class="card stg press" style="--i:1;margin-top:var(--s3);padding:var(--s4)" onclick="openOrderProduct('${o.product.replace(/'/g,"’")}')">
         <div class="row" style="gap:var(--s3)">
           <div class="ph" data-cap="商品图" style="width:64px;height:64px;flex:0 0 64px">${ic('box',22)}</div>
           <div style="flex:1">
             <div class="t-head" style="font-size:15px">${o.product}</div>
             <div class="t-cap">${o.spec}</div>
+            <div class="t-cap" style="margin-top:6px;color:var(--accent);display:flex;align-items:center;gap:4px">查看产品介绍 ${ic('chevR',13)}</div>
           </div>
         </div>
         <div style="height:1px;background:var(--line);margin:var(--s3) 0"></div>
@@ -1337,7 +1420,7 @@ S['m-odetail'] = {
         </div>
       </div>
 
-      <div class="card stg" style="--i:3;margin-top:var(--s3);padding:var(--s4)">
+      <div class="card stg" style="--i:2;margin-top:var(--s3);padding:var(--s4)">
         <div class="between">
           <div class="row">
             <div style="width:40px;height:40px;border-radius:var(--r-sm);background:var(--accent-soft);display:grid;place-items:center;color:var(--accent)">${ic('cal',20)}</div>
@@ -1347,7 +1430,7 @@ S['m-odetail'] = {
         </div>
       </div>
 
-      <button class="press stg" style="--i:4;width:100%;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-md);padding:var(--s4);display:flex;align-items:center;justify-content:space-between;margin-top:var(--s3)" onclick="toast('售后工单：首响 24h · 结案 7 天')">
+      <button class="press stg" style="--i:3;width:100%;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-md);padding:var(--s4);display:flex;align-items:center;justify-content:space-between;margin-top:var(--s3)" onclick="toast('售后工单：首响 24h · 结案 7 天')">
         <span class="row" style="gap:var(--s2)"><span style="color:var(--ink-2)">${ic('headset',18)}</span><span class="t-head" style="font-size:15px">申请售后</span></span>
         <span style="color:var(--ink-3)">${ic('chevR',18)}</span>
       </button>
@@ -1484,7 +1567,7 @@ S['m-mine'] = {
   html(){
     const r = state.role;
     const roleName = {member:'会员', sales:'销售顾问', admin:'管理员'}[r];
-    const memberTools=(r==='member'?[['heart','我的收藏', state.favs.size+' 件收藏','m-fav']]:[]).concat([['order','我的订单','查看进度与售后','m-order'],['gift','积分与权益','12,860 分可用','m-points'],['cal','我的预约','到店试睡 · 配送安装',''],['shield','隐私与注销','个人信息权利','']]);
+    const memberTools=(r==='member'?[['heart','我的收藏', state.favs.size+' 件收藏','m-fav']]:[]).concat([['order','我的订单','查看订单与售后','m-order'],['gift','积分与权益','12,860 分可用','m-points'],['cal','我的预约','到店试睡 · 配送安装',''],['shield','隐私与注销','个人信息权利','']]);
     return `
     <div class="navbar">
       <div style="width:44px"></div><h1>我的</h1>
@@ -2021,7 +2104,9 @@ S['a-hub'] = {
       ]],
       ['内容管理',[
         ['a-products','产品管理','产品新增 / 编辑 / 上下架','box'],
-        ['a-cases','案例管理','案例新增 / 编辑 / 定位','image']
+        ['a-cats','产品分类','分类自定义增删改','cat'],
+        ['a-cases','案例管理','案例新增 / 编辑 / 定位','image'],
+        ['a-promos','促销活动','活动新增 / 编辑 / 图片','image']
       ]],
       ['系统设置',[
         ['a-config','系统参数配置','积分 / 通知 / 范围','cog']
@@ -2095,7 +2180,7 @@ S['a-products'] = {
           <div style="flex:1;min-width:0">
             <div class="t-head" style="font-size:15px">${p.name}</div>
             <div class="t-cap" style="margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.sub}</div>
-            <div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap"><span class="badge blue" style="font-size:11px">${p.firm}</span><span class="badge gold" style="font-size:11px">${p.series}</span><span class="badge grey" style="font-size:11px">${p.size}</span></div>
+            <div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap"><span class="badge" style="font-size:11px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line)">${p.category}</span><span class="badge blue" style="font-size:11px">${p.firm}</span><span class="badge gold" style="font-size:11px">${p.series}</span><span class="badge grey" style="font-size:11px">${p.size}</span></div>
           </div>
           <div class="row" style="gap:6px;flex:0 0 auto">
             <button class="iconbtn press" onclick="openProductForm(${i})">${ic('edit',18)}</button>
@@ -2107,12 +2192,13 @@ S['a-products'] = {
   }
 };
 function openProductForm(idx){
-  const p = idx==null ? {name:'',sub:'',series:'铭郡系列',firm:'适中',size:'1.8m × 2.0m',badge:'旗舰系列',img:''} : state.products[idx];
+  const p = idx==null ? {name:'',sub:'',category:'床垫',series:'铭郡系列',firm:'适中',size:'1.8m × 2.0m',badge:'旗舰系列',img:''} : state.products[idx];
   openSheet(`
     <div class="sheet-grab"></div>
     <div class="between" style="margin-bottom:var(--s4)"><div class="t-head">${idx==null?'新增产品':'编辑产品'}</div><button class="iconbtn press" onclick="closeSheet()">${ic('close')}</button></div>
     <div class="field"><label>产品名称</label><input class="input" id="pfName" value="${p.name.replace(/"/g,'&quot;')}"></div>
     <div class="field"><label>卖点简介</label><input class="input" id="pfSub" value="${p.sub.replace(/"/g,'&quot;')}"></div>
+    <div class="field"><label>分类</label><select class="input" id="pfCategory">${state.categories.map(c=>`<option ${c===p.category?'selected':''}>${c}</option>`).join('')}</select></div>
     <div class="field"><label>系列</label><select class="input" id="pfSeries">${['铭郡系列','臻享系列','舒享系列'].map(s=>`<option ${s===p.series?'selected':''}>${s}</option>`).join('')}</select></div>
     <div class="field"><label>软硬度</label><select class="input" id="pfFirm">${['偏硬','适中','偏软'].map(s=>`<option ${s===p.firm?'selected':''}>${s}</option>`).join('')}</select></div>
     <div class="field"><label>尺寸</label><select class="input" id="pfSize">${['1.5m × 2.0m','1.8m × 2.0m','2.0m × 2.2m'].map(s=>`<option ${s===p.size?'selected':''}>${s}</option>`).join('')}</select></div>
@@ -2125,6 +2211,7 @@ function saveProduct(idx){
   const obj={
     name:($('pfName').value.trim()||'未命名产品'),
     sub:$('pfSub').value.trim(),
+    category:$('pfCategory').value,
     series:$('pfSeries').value,
     firm:$('pfFirm').value,
     size:$('pfSize').value,
@@ -2140,6 +2227,75 @@ function delProduct(idx){
     <div class="t-head" style="margin-bottom:var(--s3)">删除确认</div>
     <div class="t-sec" style="margin-bottom:var(--s4)">确认删除「${state.products[idx].name}」？该操作会同步从会员端产品列表移除。</div>
     <div class="row" style="gap:var(--s2)"><button class="btn ghost press" style="flex:1" onclick="closeSheet()">取消</button><button class="btn press" style="flex:1;background:var(--danger);border-color:var(--danger)" onclick="state.products.splice(${idx},1);closeSheet();render('in');toast('已删除')">删除</button></div>
+  `);
+}
+
+/* ---------- 管理 · 产品分类维护（自定义增删改） ---------- */
+S['a-cats'] = {
+  role:'admin', tab:'m-mine', title:'管理 · 产品分类', depth:2, back:'a-hub',
+  notes:{
+    '布局要点':'列表展示全部产品分类（名称 + 该类在售数量）；右上角「新增」，每行「编辑 / 删除」；改动写入 state.categories，即时同步会员端产品列表的分类筛选与后台产品表单下拉。',
+    '动效':'① 新增 / 编辑弹层 320ms 缓出；② 删除二次确认；③ 保存后整屏重渲染。',
+    '状态':'已包含：在售数量统计、删除确认、与会员端 / 后台数据联动。',
+    '依据':'用户需求：产品增加分类（床垫 / 床 / 枕头等），支持后台自定义'
+  },
+  html(){
+    const count=c=>state.products.filter(p=>p.category===c).length;
+    return `
+    <div class="navbar">
+      <button class="iconbtn press" onclick="back()">${ic('chevL')}</button>
+      <h1>产品分类</h1>
+      <button class="iconbtn press" onclick="openCatForm()">${ic('plus')}</button>
+    </div>
+    <div class="pad" style="padding-top:var(--s2)">
+      <div class="between" style="margin-bottom:var(--s3)"><span class="t-cap">共 ${state.categories.length} 个分类</span><span class="t-cap">同步至会员端筛选</span></div>
+      ${state.categories.length===0?`<div class="card" style="padding:var(--s7);text-align:center">
+        <div class="t-cap" style="color:var(--ink-2)">暂无分类，点击右上角新增</div>
+      </div>`:`
+      ${state.categories.map((c,i)=>`
+        <div class="card" style="padding:var(--s4);margin-bottom:var(--s3);display:flex;gap:var(--s3);align-items:center" id="cat-${i}">
+          <div style="width:40px;height:40px;border-radius:var(--r-sm);background:var(--accent-soft);display:grid;place-items:center;color:var(--accent);flex:0 0 auto">${ic('cat',20)}</div>
+          <div style="flex:1;min-width:0">
+            <div class="t-head" style="font-size:15px">${c}</div>
+            <div class="t-cap" style="margin-top:2px">在售 ${count(c)} 款</div>
+          </div>
+          <div class="row" style="gap:6px;flex:0 0 auto">
+            <button class="iconbtn press" onclick="openCatForm(${i})">${ic('edit',18)}</button>
+            <button class="iconbtn press" style="color:var(--danger)" onclick="delCat(${i})">${ic('trash',18)}</button>
+          </div>
+        </div>`).join('')}`}
+      <div style="height:var(--s6)"></div>
+    </div>`;
+  }
+};
+function openCatForm(idx){
+  const c = idx==null ? '' : state.categories[idx];
+  openSheet(`
+    <div class="sheet-grab"></div>
+    <div class="between" style="margin-bottom:var(--s4)"><div class="t-head">${idx==null?'新增分类':'编辑分类'}</div><button class="iconbtn press" onclick="closeSheet()">${ic('close')}</button></div>
+    <div class="field"><label class="req">分类名称</label><input class="input" id="cfCat" value="${c.replace(/"/g,'&quot;')}" placeholder="如：床垫 / 床 / 枕头"></div>
+    <button class="btn block press" style="margin-top:var(--s4)" onclick="saveCat(${idx==null?'null':idx})">${idx==null?'添加':'保存'}</button>
+    <div class="t-cap" style="text-align:center;margin-top:var(--s3)">分类将出现在会员端产品筛选与后台产品表单</div>
+  `);
+}
+function saveCat(idx){
+  const v=($('cfCat').value.trim()||'未命名分类');
+  if(idx==null){
+    if(state.categories.indexOf(v)>=0){ toast('分类已存在'); return; }
+    state.categories.push(v);
+  } else {
+    state.categories[idx]=v;
+  }
+  closeSheet(); render('in'); toast(idx==null?'已添加分类':'已保存');
+}
+function delCat(idx){
+  const name=state.categories[idx];
+  const n=state.products.filter(p=>p.category===name).length;
+  openSheet(`
+    <div class="sheet-grab"></div>
+    <div class="t-head" style="margin-bottom:var(--s3)">删除确认</div>
+    <div class="t-sec" style="margin-bottom:var(--s4)">确认删除分类「${name}」？${n?`当前有 ${n} 款产品归属该分类，删除后这些产品分类标记将保留原值（可在产品管理中重新归类）。`:''}</div>
+    <div class="row" style="gap:var(--s2)"><button class="btn ghost press" style="flex:1" onclick="closeSheet()">取消</button><button class="btn press" style="flex:1;background:var(--danger);border-color:var(--danger)" onclick="state.categories.splice(${idx},1);closeSheet();render('in');toast('已删除')">删除</button></div>
   `);
 }
 
@@ -2163,7 +2319,7 @@ S['a-cases'] = {
       <div class="between" style="margin-bottom:var(--s3)"><span class="t-cap">共 ${state.cases.length} 篇</span><span class="t-cap">数据同步至会员端</span></div>
       ${state.cases.map((c,i)=>`
         <div class="card" style="padding:var(--s3);margin-bottom:var(--s3);display:flex;gap:var(--s3);align-items:center" id="case-${i}">
-          <img src="${c.img}" style="width:64px;height:64px;border-radius:var(--r-sm);object-fit:cover;background:var(--panel);flex:0 0 auto" alt="">
+          ${c.video||c.videoLink?`<div style="position:relative;flex:0 0 auto"><img src="${c.img}" style="width:64px;height:64px;border-radius:var(--r-sm);object-fit:cover;background:var(--panel)"><div style="position:absolute;inset:0;display:grid;place-items:center;color:#fff"><span style="background:rgba(0,0,0,.45);border-radius:999px;width:26px;height:26px;display:grid;place-items:center">${ic('video',13)}</span></div></div>`:`<img src="${c.img}" style="width:64px;height:64px;border-radius:var(--r-sm);object-fit:cover;background:var(--panel);flex:0 0 auto" alt="">`}
           <div style="flex:1;min-width:0">
             <div class="t-head" style="font-size:15px">${c.title}</div>
             <div class="t-cap" style="margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.sub}</div>
@@ -2187,6 +2343,8 @@ function openCaseForm(idx){
     <div class="field"><label>案例标题</label><input class="input" id="cfTitle" value="${c.title.replace(/"/g,'&quot;')}"></div>
     <div class="field"><label>案例简介</label><input class="input" id="cfSub" value="${c.sub.replace(/"/g,'&quot;')}"></div>
     <div class="field"><label>封面 URL（留空用默认图）</label><input class="input" id="cfImg" value="${c.img.replace(/"/g,'&quot;')}"></div>
+    <div class="field"><label>视频 URL（选填，支持 mp4 直链）</label><input class="input" id="cfVideo" value="${(c.video||'').replace(/"/g,'&quot;')}" placeholder="粘贴视频直链，留空则为照片案例"></div>
+    <div class="field"><label>短视频外链（选填，抖音 / 视频号等）</label><input class="input" id="cfVLink" value="${(c.videoLink||'').replace(/"/g,'&quot;')}" placeholder="粘贴短视频分享链接"></div>
     <div class="field"><label>定位（关联门店 / 地址）</label>
       <input class="input" id="cfAddr" value="${(loc.addr||'').replace(/"/g,'&quot;')}" placeholder="如：江苏·常熟好得家旗舰店">
       <div class="row" style="gap:var(--s2);margin-top:8px">
@@ -2213,6 +2371,8 @@ function saveCase(idx){
     title:($('cfTitle').value.trim()||'未命名案例'),
     sub:$('cfSub').value.trim(),
     img:$('cfImg').value.trim()||SEED.cases[0].img,
+    video:($('cfVideo').value.trim()||''),
+    videoLink:($('cfVLink').value.trim()||''),
     loc:(addr||!isNaN(lat))?{lat:isNaN(lat)?null:lat, lng:isNaN(lng)?null:lng, addr:addr}:null
   };
   if(idx==null) state.cases.push(obj); else state.cases[idx]=obj;
@@ -2224,6 +2384,64 @@ function delCase(idx){
     <div class="t-head" style="margin-bottom:var(--s3)">删除确认</div>
     <div class="t-sec" style="margin-bottom:var(--s4)">确认删除案例「${state.cases[idx].title}」？该操作会同步从会员端案例展示移除。</div>
     <div class="row" style="gap:var(--s2)"><button class="btn ghost press" style="flex:1" onclick="closeSheet()">取消</button><button class="btn press" style="flex:1;background:var(--danger);border-color:var(--danger)" onclick="state.cases.splice(${idx},1);closeSheet();render('in');toast('已删除')">删除</button></div>
+  `);
+}
+
+/* ---------- 管理 · 促销活动（会员端首页「近期促销活动」配置） ---------- */
+S['a-promos'] = {
+  role:'admin', tab:'m-mine', title:'管理 · 促销活动', depth:2, back:'a-hub',
+  notes:{
+    '布局要点':'列表展示促销活动（封面 + 标题 + 简介）；右上角「新增」，每行「编辑 / 删除」；活动图片同步至会员端首页「近期促销活动」，点击弹窗看大图。',
+    '状态':'已包含：新增 / 编辑回填 / 删除确认。',
+    '依据':'用户需求：首页推荐产品改为近期促销活动，后台配置活动图片'
+  },
+  html(){
+    return `
+    <div class="navbar">
+      <button class="iconbtn press" onclick="back()">${ic('chevL')}</button>
+      <h1>促销活动管理</h1>
+      <button class="iconbtn press" onclick="openPromoForm()">${ic('plus')}</button>
+    </div>
+    <div class="pad" style="padding-top:var(--s2)">
+      <div class="between" style="margin-bottom:var(--s3)"><span class="t-cap">共 ${state.promos.length} 个活动</span><span class="t-cap">同步至会员端首页</span></div>
+      ${state.promos.map((p,i)=>`
+        <div class="card" style="padding:var(--s3);margin-bottom:var(--s3);display:flex;gap:var(--s3);align-items:center" id="promo-${i}">
+          ${p.img?`<img src="${p.img}" style="width:64px;height:64px;border-radius:var(--r-sm);object-fit:cover;background:var(--panel);flex:0 0 auto" alt="">`:`<div style="width:64px;height:64px;border-radius:var(--r-sm);background:linear-gradient(135deg,#0e3a6e,#1d5fa8);flex:0 0 auto"></div>`}
+          <div style="flex:1;min-width:0">
+            <div class="t-head" style="font-size:15px">${p.title}</div>
+            <div class="t-cap" style="margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.sub}</div>
+          </div>
+          <div class="row" style="gap:6px;flex:0 0 auto">
+            <button class="iconbtn press" onclick="openPromoForm(${i})">${ic('edit',18)}</button>
+            <button class="iconbtn press" style="color:var(--danger)" onclick="delPromo(${i})">${ic('trash',18)}</button>
+          </div>
+        </div>`).join('')}
+      <div style="height:var(--s6)"></div>
+    </div>`;
+  }
+};
+function openPromoForm(idx){
+  const p = idx==null ? {title:'',sub:'',img:''} : state.promos[idx];
+  openSheet(`
+    <div class="sheet-grab"></div>
+    <div class="between" style="margin-bottom:var(--s4)"><div class="t-head">${idx==null?'新增活动':'编辑活动'}</div><button class="iconbtn press" onclick="closeSheet()">${ic('close')}</button></div>
+    <div class="field"><label>活动标题</label><input class="input" id="pfTitle" value="${p.title.replace(/"/g,'&quot;')}"></div>
+    <div class="field"><label>活动简介</label><input class="input" id="pfSub" value="${p.sub.replace(/"/g,'&quot;')}"></div>
+    <div class="field"><label>活动图片 URL（留空用默认图）</label><input class="input" id="pfImg" value="${p.img.replace(/"/g,'&quot;')}"></div>
+    <button class="btn block press" style="margin-top:var(--s4)" onclick="savePromo(${idx==null?'null':idx})">${idx==null?'添加':'保存'}</button>
+  `);
+}
+function savePromo(idx){
+  const obj={ title:($('pfTitle').value.trim()||'未命名活动'), sub:$('pfSub').value.trim(), img:$('pfImg').value.trim() };
+  if(idx==null) state.promos.push(obj); else state.promos[idx]=obj;
+  closeSheet(); render('in'); toast(idx==null?'已添加活动':'已保存');
+}
+function delPromo(idx){
+  openSheet(`
+    <div class="sheet-grab"></div>
+    <div class="t-head" style="margin-bottom:var(--s3)">删除确认</div>
+    <div class="t-sec" style="margin-bottom:var(--s4)">确认删除活动「${state.promos[idx].title}」？该操作会同步从会员端首页移除。</div>
+    <div class="row" style="gap:var(--s2)"><button class="btn ghost press" style="flex:1" onclick="closeSheet()">取消</button><button class="btn press" style="flex:1;background:var(--danger);border-color:var(--danger)" onclick="state.promos.splice(${idx},1);closeSheet();render('in');toast('已删除')">删除</button></div>
   `);
 }
 
@@ -2324,10 +2542,12 @@ S['s-cdetail'] = {
             <div class="t-head" style="font-size:17px">${c.name} <span class="t-cap num">${c.phone}</span></div>
             <div class="t-cap" style="margin-top:2px">${c.advisor}</div>
           </div>
-          <span class="badge ${c.tag==='生日关怀'?'gold':(c.tag==='售后'?'danger':'blue')}">${c.tag}</span>
+          ${custMarker(c)}
         </div>
         <div style="height:1px;background:var(--line);margin:var(--s3) 0"></div>
         <div class="row" style="gap:var(--s5);flex-wrap:wrap">
+          <div><div class="t-cap">客户类型</div><div class="t-sec" style="margin-top:3px">${c.ctype}${c.ctype==='成交客户'?' · '+c.level:''}</div></div>
+          <div><div class="t-cap">会员标签</div><div class="t-sec" style="margin-top:3px">${c.tag}</div></div>
           <div><div class="t-cap">可用积分</div><div class="t-body num" style="font-size:18px;font-weight:600;margin-top:3px">${c.points.toLocaleString('en-US')}</div></div>
           <div><div class="t-cap">当前状态</div><div class="t-sec" style="margin-top:3px">${c.status}</div></div>
           <div><div class="t-cap">收货地址</div><div class="t-sec" style="margin-top:3px">${c.addr||'待订单创建后维护'}</div></div>
@@ -2533,49 +2753,175 @@ function saveAsNote(){ const t = state.viewOrder || state.tickets[0]; const v=($
 S['s-clients'] = {
   role:'sales', tab:'m-mine', title:'客户管理', depth:2, back:'m-mine',
   notes:{
-    '布局要点':'客户列表脱敏展示（手机号掩码、积分等宽）；顶部搜索 + 状态筛选；点击查看客户档案（FR-04 归属 / FR-07）。',
-    '动效':'① 列表 45ms 阶梯入场；② 顶部计数徽标；③ 进入档案弹层 320ms 缓出。',
-    '状态':'已包含：空态、筛选态、详情弹层（代客下单 / 编辑资料 / 沟通 / 电话）；客户数据在 state.clients，编辑即时回写列表。',
-    '依据':'销售 / 管理员可代客下单（记账型草稿）与维护会员资料 · 改派需管理员审批'
+    '布局要点':'客户 / 会员列表脱敏展示（手机号掩码）；顶部搜索 + 状态筛选；支持「手动新增会员」（仅需手机号 + 基本信息，绑定前标记待绑定）+「选择通知」按手机号批量推送短信 / 服务号。',
+    '动效':'① 列表 45ms 阶梯入场；② 选择模式下卡片出现勾选圈并高亮；③ 进入档案弹层 320ms 缓出。',
+    '状态':'已包含：手动新增会员（待绑定）、选择通知（短信 / 服务号）、会员详情内单发通知、手机号绑定状态展示。',
+    '依据':'销售 / 管理员可代客维护会员资料 · 会员后续通过小程序以手机号绑定补全资料与订单 · 通知支持短信（运营商通道）与服务号（模板消息）'
   },
   html(){
+    const selMode = state.clientsSelectMode;
+    const selCount = state.clientsSel.size;
     return `
     <div class="navbar">
       <button class="iconbtn press" onclick="back()">${ic('chevL')}</button>
-      <h1>客户管理</h1>
+      <h1>${selMode?('已选 '+selCount+' 位'):'客户管理'}</h1>
       <button class="iconbtn press" onclick="toast('导出客户（云存储临时链接）')">${ic('doc')}</button>
     </div>
     <div class="pad" style="padding-top:var(--s2)">
       <div class="card stg" style="--i:0;padding:var(--s3)">
         <div class="row" style="gap:var(--s2)"><span style="color:var(--accent)">${ic('search',18)}</span><input class="input" style="border:0;padding:6px 0" placeholder="搜索客户姓名 / 手机号" onfocus="toast('搜索客户')"></div>
       </div>
-      <div class="row stg" style="--i:1;gap:var(--s2);margin:var(--s4) 0;flex-wrap:wrap">
+      <div class="row" style="gap:var(--s2);margin:var(--s3) 0">
+        <button class="btn ghost press" style="flex:1" onclick="openAddMember()">${ic('plus',16)} 新增会员</button>
+        ${selMode
+          ? `<button class="btn ghost press" style="flex:1" onclick="selAllClients()">${ic('check',16)} ${selCount===state.clients.length?'取消全选':'全选'}</button>`
+          : `<button class="btn ghost press" style="flex:1" onclick="enterSelectMode()">${ic('send',16)} 选择通知</button>`}
+      </div>
+      ${selMode?`<div class="t-cap" style="margin:0 0 var(--s3);color:var(--accent)">已勾选的会员将收到同一条通知 · 点击卡片可切换选中</div>`:''}
+      <div class="row stg" style="--i:1;gap:var(--s2);margin:0 0 var(--s4);flex-wrap:wrap">
         <button class="chip on press">全部 ${state.clients.length}</button>
+        ${selMode?`<button class="chip press" onclick="openNotify('all')">一键群发全部 ${ic('send',14)}</button>`:''}
         <button class="chip press" onclick="toast('筛选：本周新增')">本周新增</button>
         <button class="chip press" onclick="toast('筛选：待跟进')">待跟进</button>
         <button class="chip press" onclick="toast('筛选：生日')">生日</button>
       </div>
       ${state.clients.map((c,i)=>`
-        <div class="card press stg" style="--i:${i+2};padding:var(--s4);margin-bottom:var(--s3)" onclick="state.curClient=${i};go('s-cdetail')">
+        <div class="card press stg" style="--i:${i+2};padding:var(--s4);margin-bottom:var(--s3);${selMode&&state.clientsSel.has(i)?'outline:2px solid var(--accent);background:var(--accent-soft)':''}" onclick="${selMode?('toggleClientSel('+i+')'):('state.curClient='+i+';go(\'s-cdetail\')')}">
           <div class="between">
             <div class="row" style="gap:var(--s3)">
+              ${selMode?`<span class="checkcircle ${state.clientsSel.has(i)?'on':''}">${state.clientsSel.has(i)?ic('check',14):''}</span>`:''}
               <div class="avatar" style="width:42px;height:42px">${c.name.charAt(0)}</div>
               <div>
                 <div class="t-head" style="font-size:15px">${c.name} <span class="t-cap num">${c.phone}</span></div>
                 <div class="t-cap" style="margin-top:2px">${c.advisor}</div>
               </div>
             </div>
-            <span class="badge ${c.tag==='生日关怀'?'gold':(c.tag==='售后'?'danger':'blue')}">${c.status}</span>
+            <div class="row" style="gap:6px;align-items:center">${custMarker(c)}${c.bind==='待绑定'?'<span style="display:inline-flex;align-items:center;font:500 11px/1 var(--font-sans);padding:4px 8px;border-radius:99px;background:#FBEFD8;color:#C8841F">待绑定</span>':''}</div>
           </div>
           <div class="between" style="margin-top:var(--s3)">
-            <span class="t-cap">积分 ${c.points.toLocaleString('en-US')} · 最近 ${c.last}</span>
-            <span style="color:var(--accent);display:flex;align-items:center;gap:4px;font:500 13px/1 var(--font-sans)">查看 ${ic('chevR',14)}</span>
+            <span class="t-cap">${c.status} · 积分 ${c.points.toLocaleString('en-US')} · 最近 ${c.last}</span>
+            ${selMode?'':`<span style="color:var(--accent);display:flex;align-items:center;gap:4px;font:500 13px/1 var(--font-sans)">查看 ${ic('chevR',14)}</span>`}
           </div>
         </div>`).join('')}
-      <div style="height:var(--s6)"></div>
-    </div>`;
+      <div style="height:${selMode?'150px':'var(--s6)'}"></div>
+    </div>
+    ${selMode?`
+    <div class="actionbar">
+      <button class="btn ghost press" style="flex:0 0 auto" onclick="exitSelectMode()">取消</button>
+      <button class="btn block press" style="flex:1;margin-left:var(--s2)" onclick="openNotify([...state.clientsSel])" ${selCount?'':'disabled style="opacity:.5"'}>${ic('send',16)} 发送通知（${selCount}）</button>
+    </div>`:''}
+    `;
   }
 };
+/* 进入 / 退出多选通知模式 */
+function enterSelectMode(){ state.clientsSelectMode = true; render('in'); }
+function exitSelectMode(){ state.clientsSelectMode = false; state.clientsSel.clear(); render('in'); }
+function toggleClientSel(i){
+  if(state.clientsSel.has(i)) state.clientsSel.delete(i); else state.clientsSel.add(i);
+  render('in');
+}
+function selAllClients(){
+  if(state.clientsSel.size === state.clients.length){ state.clientsSel.clear(); }
+  else { state.clients.forEach((_,i)=>state.clientsSel.add(i)); }
+  render('in');
+}
+/* 手动新增会员：仅需手机号 + 基本信息，绑定前标记待绑定 */
+function openAddMember(){
+  openSheet(`
+    <div class="sheet-grab"></div>
+    <div class="between" style="margin-bottom:var(--s4)">
+      <div class="t-head">新增会员</div>
+      <button class="iconbtn press" onclick="closeSheet()">${ic('close')}</button>
+    </div>
+    <div class="field"><label class="req">手机号</label><input class="input num" id="amPhone" placeholder="录入会员手机号，用于后续绑定"></div>
+    <div class="field"><label>姓名（基本信息 · 选填）</label><input class="input" id="amName" placeholder="如：李先生"></div>
+    <div class="field"><label>归属顾问</label>
+      <select class="input" id="amAdvisor">${state.advisors.map(a=>`<option>${a}</option>`).join('')}</select>
+    </div>
+    <div class="field"><label>客户类型</label>
+      <select class="input" id="amCtype">${state.custTypes.map(t=>`<option ${t==='意向客户'?'selected':''}>${t}</option>`).join('')}</select>
+    </div>
+    <div class="t-cap" style="background:var(--accent-soft);color:var(--accent-strong);border-radius:var(--r-md);padding:var(--s3);margin-bottom:var(--s4)">仅需手机号与基本信息即可建档。会员后续在小程序以该手机号登录 / 绑定后，将自动补全资料、订单与收藏，绑定前状态标记为「待绑定」。</div>
+    <button class="btn block press" onclick="saveMember()">保存并建档</button>
+    <div class="t-cap" style="text-align:center;margin-top:var(--s3)">建档后可在列表勾选，向其发送短信或服务号通知</div>
+  `);
+}
+function saveMember(){
+  const phone = ($('amPhone')||{}).value ? $('amPhone').value.trim() : '';
+  if(!phone){ toast('请录入会员手机号'); return; }
+  const name = ($('amName')||{}).value ? $('amName').value.trim() : '待绑定会员';
+  const advisor = ($('amAdvisor')||{}).value || state.advisors[0];
+  const ctype = ($('amCtype')||{}).value || '意向客户';
+  state.clients.unshift({
+    name, phone:maskPhone(phone), phoneRaw:phone, advisor, ctype,
+    bind:'待绑定', tag:'新客', status:'待绑定 · 待会员补全资料', points:0, last:'刚刚新增',
+    orders:[], followups:[{date:'今天',content:'门店手动建档，待会员小程序绑定后补全',result:'待绑定'}], pointsLog:[], level:''
+  });
+  closeSheet(); render('in');
+  toast('已新增会员「'+name+'」，待其在小程序绑定手机号后补全资料');
+}
+/* 发送通知：支持短信 / 服务号（模板消息） */
+function openNotify(ids){
+  state.notifyChannel = 'sms';
+  const n = (ids==='all') ? state.clients.length : ids.length;
+  openSheet(`
+    <div class="sheet-grab"></div>
+    <div class="between" style="margin-bottom:var(--s4)">
+      <div class="t-head">发送通知</div>
+      <button class="iconbtn press" onclick="closeSheet()">${ic('close')}</button>
+    </div>
+    <div class="between" style="margin-bottom:var(--s3)"><span class="t-cap">接收范围</span><span class="t-sec" style="color:var(--ink)">${n} 位会员（按手机号去重）</span></div>
+    <div class="seg2" style="margin-bottom:var(--s4)">
+      <div class="seg-ind" id="nSegInd"></div>
+      <button class="on" data-ch="sms" onclick="setNCh('sms')">${ic('phone',16)} 短信</button>
+      <button data-ch="svc" onclick="setNCh('svc')">${ic('bell',16)} 服务号</button>
+    </div>
+    <div class="field"><label class="req">通知标题</label><input class="input" id="nTitle" value="丝涟会员专享" oninput="syncNPrev()"></div>
+    <div class="field"><label class="req">通知内容</label><textarea class="input" id="nBody" rows="3" placeholder="如：您预约的床垫保养将于本周六上门，请保持电话畅通" oninput="syncNPrev()">亲爱的会员，本周末到店试睡可领专属礼遇，期待与您相见。</textarea>
+    <div class="t-cap" style="margin-top:6px">${state.notifyChannel==='sms'?'短信含退订指令，按条计费（演示 0.045 元/条）':'服务号模板消息免通道费，需会员曾授权订阅'}</div>
+    </div>
+    <div class="t-cap" style="margin:var(--s3) 0 var(--s2)">会员端预览</div>
+    <div id="nSms" class="card" style="padding:var(--s4);background:#fff;border:1px solid var(--line);border-radius:var(--r-md)">
+      <div class="t-cap num" style="color:var(--ink-3)">+86 ${'138****8000'}</div>
+      <div class="t-sec" style="margin-top:6px;color:var(--ink)"><b id="nPrevTitle">丝涟会员专享</b></div>
+      <div class="t-body" style="margin-top:4px" id="nPrevBody">亲爱的会员，本周末到店试睡可领专属礼遇，期待与您相见。</div>
+      <div class="t-cap" style="margin-top:8px;color:var(--ink-3)">【丝涟会员】回 TD 退订</div>
+    </div>
+    <div id="nSvc" class="card" style="padding:0;overflow:hidden;display:none">
+      <div style="background:var(--navy);color:#fff;padding:var(--s3) var(--s4);font:600 13px/1 var(--font-sans);display:flex;align-items:center;gap:6px">${ic('bell',16)} 丝涟床垫服务号</div>
+      <div style="padding:var(--s4)">
+        <div class="t-head" style="font-size:15px" id="nPrevTitle2">丝涟会员专享</div>
+        <div class="t-body" style="margin-top:6px;color:var(--ink-2)" id="nPrevBody2">亲爱的会员，本周末到店试睡可领专属礼遇，期待与您相见。</div>
+        <div style="margin-top:var(--s3);display:inline-flex;align-items:center;gap:4px;color:var(--accent);font:500 13px/1 var(--font-sans)">查看详情 ${ic('chevR',14)}</div>
+      </div>
+    </div>
+    <button class="btn block press" style="margin-top:var(--s4)" onclick="sendNotify([${ids==='all'?"'all'":ids.map(i=>i).join(',')}])">${ic('send',16)} 发送（${n} 位）</button>
+    <div class="t-cap" style="text-align:center;margin-top:var(--s3)">发送后写入操作日志，可在消息中心查看触达结果</div>
+  `);
+}
+function setNCh(ch){
+  state.notifyChannel = ch;
+  document.querySelectorAll('#nSeg .seg2 button, .seg2 button').forEach(b=>b.classList.toggle('on', b.dataset.ch===ch));
+  const ind = $('nSegInd'); if(ind) ind.style.transform = (ch==='sms') ? 'translateX(0)' : 'translateX(100%)';
+  const sms = $('nSms'), svc = $('nSvc');
+  if(sms) sms.style.display = (ch==='sms') ? 'block' : 'none';
+  if(svc) svc.style.display = (ch==='svc') ? 'block' : 'none';
+}
+function syncNPrev(){
+  const t = ($('nTitle')||{}).value || '丝涟会员专享';
+  const c = ($('nBody')||{}).value || '通知内容';
+  const a = $('nPrevTitle'), b = $('nPrevBody'), a2 = $('nPrevTitle2'), b2 = $('nPrevBody2');
+  if(a) a.textContent = t;
+  if(b) b.textContent = c;
+  if(a2) a2.textContent = t;
+  if(b2) b2.textContent = c;
+}
+function sendNotify(ids){
+  const ch = state.notifyChannel==='svc' ? '服务号' : '短信';
+  const n = (ids && ids[0]==='all') ? state.clients.length : (ids?ids.length:state.clients.length);
+  closeSheet();
+  toast('已通过'+ch+'向 '+n+' 位会员发送通知，预计送达率 98%');
+}
 function openClient(i){
   const c = state.clients[i];
   openSheet(`
@@ -2587,13 +2933,17 @@ function openClient(i){
       </div>
       <button class="iconbtn press" onclick="closeSheet()">${ic('close')}</button>
     </div>
-    <div class="card" style="padding:var(--s4);margin-bottom:var(--s3)">
-      <div class="between" style="padding:6px 0"><span class="t-cap">归属顾问</span><span class="t-sec" style="color:var(--ink)">${c.advisor}</span></div>
-      <div class="between" style="padding:6px 0"><span class="t-cap">标签</span><span class="t-sec" style="color:var(--ink)">${c.tag}</span></div>
-      <div class="between" style="padding:6px 0"><span class="t-cap">状态</span><span class="t-sec" style="color:var(--ink)">${c.status}</span></div>
-      <div class="between" style="padding:6px 0"><span class="t-cap">可用积分</span><span class="t-sec num" style="color:var(--ink)">${c.points.toLocaleString('en-US')}</span></div>
-    </div>
-    <button class="btn block press" onclick="openOrderForm(${i})">${ic('plus',16)} 代客下单</button>
+      <div class="card" style="padding:var(--s4);margin-bottom:var(--s3)">
+        <div class="between" style="padding:6px 0"><span class="t-cap">归属顾问</span><span class="t-sec" style="color:var(--ink)">${c.advisor}</span></div>
+        <div class="between" style="padding:6px 0"><span class="t-cap">客户类型</span><span class="t-sec" style="color:var(--ink)">${c.ctype}${c.ctype==='成交客户'?' · '+c.level:''}</span></div>
+        <div class="between" style="padding:6px 0"><span class="t-cap">绑定状态</span><span class="t-sec" style="color:var(--ink)">${c.bind==='待绑定'?'<span style="color:#C8841F">待绑定 · 待会员小程序补全</span>':'已绑定（手机号已核验）'}</span></div>
+        <div class="between" style="padding:6px 0"><span class="t-cap">会员标签</span><span class="t-sec" style="color:var(--ink)">${c.tag}</span></div>
+        <div class="between" style="padding:6px 0"><span class="t-cap">状态</span><span class="t-sec" style="color:var(--ink)">${c.status}</span></div>
+        <div class="between" style="padding:6px 0"><span class="t-cap">可用积分</span><span class="t-sec num" style="color:var(--ink)">${c.points.toLocaleString('en-US')}</span></div>
+      </div>
+    ${c.bind==='待绑定'?`<div class="t-cap" style="background:var(--accent-soft);color:var(--accent-strong);border-radius:var(--r-md);padding:var(--s3);margin-bottom:var(--s3)">该会员由门店手动建档，尚未在小程序完成手机号绑定。绑定后将自动同步其浏览、收藏、订单与积分。</div>`:''}
+    <button class="btn block press" onclick="closeSheet();openNotify([${i}])">${ic('send',16)} 发送通知（短信 / 服务号）</button>
+    <button class="btn block press" style="margin-top:var(--s3)" onclick="openOrderForm(${i})">${ic('plus',16)} 代客下单</button>
     <div class="row" style="gap:var(--s2);margin-top:var(--s3)">
       <button class="btn ghost press" style="flex:1" onclick="openClientEdit(${i})">${ic('edit',16)} 编辑资料</button>
       <button class="btn ghost press" style="flex:1" onclick="closeSheet();toast('发起微信沟通')">${ic('headset',16)} 沟通</button>
@@ -2643,6 +2993,12 @@ function openClientEdit(i){
     </div>
     <div class="field"><label class="req">姓名</label><input class="input" id="ceName" value="${c.name}"></div>
     <div class="field"><label class="req">手机号</label><input class="input num" id="cePhone" value="${c.phone}"></div>
+    <div class="field"><label class="req">客户类型</label>
+      <select class="input" id="ceCtype" onchange="var w=document.getElementById('ceLevelWrap');if(w){w.style.opacity=(this.value==='成交客户')?'1':'.5';var s=document.getElementById('ceLevel');if(s)s.disabled=(this.value!=='成交客户');}">${state.custTypes.map(t=>`<option ${t===c.ctype?'selected':''}>${t}</option>`).join('')}</select>
+    </div>
+    <div class="field" id="ceLevelWrap" style="${c.ctype==='成交客户'?'':'opacity:.5'}"><label>成交等级（意向客户不填）</label>
+      <select class="input" id="ceLevel" ${c.ctype==='成交客户'?'':'disabled'}>${state.custLevels.map(l=>`<option value="${l.k}" ${l.k===c.level?'selected':''}>${l.label}</option>`).join('')}</select>
+    </div>
     <div class="field"><label class="req">会员标签</label>
       <select class="input" id="ceTag">${state.tags.map(t=>`<option ${t===c.tag?'selected':''}>${t}</option>`).join('')}</select>
     </div>
@@ -2661,6 +3017,8 @@ function saveClient(i){
   c.phone = $('cePhone').value.trim() || c.phone;
   c.tag = $('ceTag') ? $('ceTag').value : c.tag;
   c.status = $('ceStatus').value.trim() || c.status;
+  c.ctype = $('ceCtype') ? $('ceCtype').value : c.ctype;
+  c.level = (c.ctype==='成交客户') ? ($('ceLevel') ? $('ceLevel').value : 'B') : '';
   closeSheet(); render('in');
   toast('已更新「' + c.name + '」的会员资料');
 }
@@ -2887,7 +3245,7 @@ function toast(msg){
 const NAV = [
   ['nav-member',[['m-home','首页'],['m-points','积分中心'],['m-order','我的订单'],['m-plist','产品列表'],['m-store','找门店'],['m-fav','我的收藏'],['m-brand','品牌介绍'],['m-mine','我的']]],
   ['nav-sales',[['m-mine','我的（销售）','sales'],['s-todo','今日待办','sales'],['s-clients','客户管理','sales']]],
-  ['nav-admin',[['m-mine','我的（管理员）','admin'],['a-hub','管理后台','admin'],['a-board','经营看板','admin'],['a-approval','审批审核','admin'],['a-products','产品管理','admin'],['a-cases','案例管理','admin'],['a-goods','积分商品维护','admin'],['s-clients','客户管理','admin'],['a-gift','赠送积分','admin'],['a-config','系统参数配置','admin']]]
+  ['nav-admin',[['m-mine','我的（管理员）','admin'],['a-hub','管理后台','admin'],['a-board','经营看板','admin'],['a-approval','审批审核','admin'],['a-products','产品管理','admin'],['a-cases','案例管理','admin'],['a-promos','促销活动','admin'],['a-goods','积分商品维护','admin'],['a-cats','产品分类','admin'],['s-clients','客户管理','admin'],['a-gift','赠送积分','admin'],['a-config','系统参数配置','admin']]]
 ];
 function goRole(role, id){ state.role = role; go(id); }
 NAV.forEach(g=>{
